@@ -124,21 +124,44 @@ namespace UserSpecificFunctions
 			switch (e.Parameters[0].ToLowerInvariant())
 			{
 				case "prefix":
-					SetPrefix(e);
+					HandleSetPrefix(e);
 					break;
 				case "suffix":
-					SetSuffix(e);
+					HandleSetSuffix(e);
 					break;
 				case "color":
 				case "colour":
-					SetColor(e);
+					HandleSetColor(e);
 					break;
 			}
 		}
 
-		private static void PermissionCommandHandler(CommandArgs e)
+		private void PermissionCommandHandler(CommandArgs e)
 		{
+			if (e.Parameters.Count < 1)
+			{
+				e.Player.SendErrorMessage("Invalid syntax! Proper syntax:");
+				e.Player.SendErrorMessage($"{Commands.Specifier}permission add <player name> <permissions>");
+				e.Player.SendErrorMessage($"{Commands.Specifier}permission delete <player name> <permissions>");
+				e.Player.SendErrorMessage($"{Commands.Specifier}permission list <player name> [page]");
+				return;
+			}
 
+			switch (e.Parameters[0].ToLower())
+			{
+				case "add":
+					HandleAddPermission(e);
+					return;
+				case "del":
+				case "rem":
+				case "delete":
+				case "remove":
+					HandleRemovePermission(e);
+					return;
+				case "list":
+					HandleGetPermissions(e);
+					return;
+			}
 		}
 
 		private void SendInvalidSyntax(CommandArgs e)
@@ -176,7 +199,7 @@ namespace UserSpecificFunctions
 			}
 		}
 
-		private void SetPrefix(CommandArgs e)
+		private void HandleSetPrefix(CommandArgs e)
 		{
 			if (!e.Player.IsLoggedIn && e.Player.RealPlayer)
 			{
@@ -258,7 +281,7 @@ namespace UserSpecificFunctions
 			}
 		}
 
-		private void SetSuffix(CommandArgs e)
+		private void HandleSetSuffix(CommandArgs e)
 		{
 			if (!e.Player.IsLoggedIn && e.Player.RealPlayer)
 			{
@@ -340,7 +363,7 @@ namespace UserSpecificFunctions
 			}
 		}
 
-		private void SetColor(CommandArgs e)
+		private void HandleSetColor(CommandArgs e)
 		{
 			if (!e.Player.IsLoggedIn && e.Player.RealPlayer)
 			{
@@ -412,6 +435,127 @@ namespace UserSpecificFunctions
 				{
 					e.Player.SendErrorMessage("Invalid color format!");
 				}
+			}
+		}
+
+		private void HandleAddPermission(CommandArgs e)
+		{
+			if (e.Parameters.Count < 3)
+			{
+				e.Player.SendErrorMessage($"Invalid syntax! Proper syntax: {Commands.Specifier}permission add <player name> <permissions>");
+				return;
+			}
+
+			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			if (users.Count == 0)
+			{
+				e.Player.SendErrorMessage($"Could not find a user under the name '{e.Parameters[1]}'");
+				return;
+			}
+			else if (users.Count > 1)
+			{
+				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(u => u.Name));
+				return;
+			}
+			else
+			{
+				e.Parameters.RemoveRange(0, 2);
+				PlayerInfo target = _database.Get(users[0]);
+
+				if (target == null)
+				{
+					target = new PlayerInfo()
+					{
+						UserId = users[0].ID,
+						ChatData = new ChatData(),
+						Permissions = new PermissionCollection(e.Parameters)
+					};
+				}
+				else
+				{
+					e.Parameters.ForEach(p => target.Permissions.AddPermission(p));
+					_database.Update(target, UpdateType.Permissions);
+				}
+
+				e.Player.SendSuccessMessage($"Modified {users[0].Name}'s permissions successfully.");
+			}
+		}
+
+		private void HandleRemovePermission(CommandArgs e)
+		{
+			if (e.Parameters.Count < 3)
+			{
+				e.Player.SendErrorMessage($"Invalid syntax! Proper syntax: {Commands.Specifier}permission remove <player name> <permissions>");
+				return;
+			}
+
+			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			if (users.Count == 0)
+			{
+				e.Player.SendErrorMessage($"Could not find a user under the name '{e.Parameters[1]}'");
+				return;
+			}
+			else if (users.Count > 1)
+			{
+				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(u => u.Name));
+				return;
+			}
+			else
+			{
+				e.Parameters.RemoveRange(0, 2);
+				PlayerInfo target = _database.Get(users[0]);
+
+				if (target == null)
+				{
+					e.Player.SendErrorMessage("This user has no custom permissions.");
+					return;
+				}
+				else
+				{
+					e.Parameters.ForEach(p => target.Permissions.RemovePermission(p));
+					_database.Update(target, UpdateType.Permissions);
+				}
+
+				e.Player.SendSuccessMessage($"Modified {users[0].Name}'s permissions successfully.");
+			}
+		}
+
+		private void HandleGetPermissions(CommandArgs e)
+		{
+			if (e.Parameters.Count < 2 || e.Parameters.Count > 3)
+			{
+				e.Player.SendErrorMessage($"Invalid syntax! Proper syntax: {Commands.Specifier}permission list <player name> [page]");
+				return;
+			}
+
+			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			if (users.Count == 0)
+			{
+				e.Player.SendErrorMessage("Invalid player!");
+				return;
+			}
+			else if (users.Count > 1)
+			{
+				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(p => p.Name));
+				return;
+			}
+			else
+			{
+				PlayerInfo target = _database.Get(users[0]);
+
+				if (target == null || target.Permissions.Count == 0)
+				{
+					e.Player.SendErrorMessage("This user has no permissions to list.");
+					return;
+				}
+
+				if (!PaginationTools.TryParsePageNumber(e.Parameters, 2, e.Player, out int pageNumber))
+				{
+					return;
+				}
+
+				e.Player.SendSuccessMessage($"{users[0].Name}'s permissions:");
+				e.Player.SendInfoMessage(target.Permissions.ToString());
 			}
 		}
 	}

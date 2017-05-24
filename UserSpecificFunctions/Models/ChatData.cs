@@ -32,9 +32,9 @@ namespace UserSpecificFunctions.Models
 		/// </summary>
 		public ChatData()
 		{
-			Prefix = string.Empty;
-			Suffix = string.Empty;
-			Color = string.Empty;
+			Prefix = null;
+			Suffix = null;
+			Color = null;
 		}
 
 		/// <summary>
