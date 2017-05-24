@@ -10,18 +10,20 @@ using TShockAPI;
 using TShockAPI.Hooks;
 using UserSpecificFunctions.Models;
 using UserSpecificFunctions.Database;
+using UserSpecificFunctions.Extensions;
+using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 
 namespace UserSpecificFunctions
 {
-	[ApiVersion(2, 0)]
+	[ApiVersion(2, 1)]
     public sealed class UserSpecificFunctionsPlugin : TerrariaPlugin
     {
 		private static readonly string configPath = Path.Combine(TShock.SavePath, "userspecificfunctions.json");
 
-		private Config _config;
-		private readonly DatabaseManager _database;
-		private readonly CommandHandler _commandHandler;
+		private readonly DatabaseManager _database = new DatabaseManager();
+		private Config _config = new Config();
+		private CommandHandler _commandHandler;
 
 		/// <summary>
 		/// Gets the author.
@@ -49,9 +51,7 @@ namespace UserSpecificFunctions
 		/// <param name="game">The <see cref="Main"/> instance.</param>
 		public UserSpecificFunctionsPlugin(Main game) : base(game)
 		{
-			_config = new Config();
-			_database = new DatabaseManager();
-			_commandHandler = new CommandHandler(_config, _database);
+
 		}
 
 		/// <summary>
@@ -79,7 +79,6 @@ namespace UserSpecificFunctions
 		public override void Initialize()
 		{
 			_database.Connect();
-			_commandHandler.Register();
 			if (File.Exists(configPath))
 			{
 				_config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(configPath));
@@ -88,11 +87,41 @@ namespace UserSpecificFunctions
 			ServerApi.Hooks.ServerChat.Register(this, OnChat);
 			PlayerHooks.PlayerPostLogin += OnPostLogin;
 			PlayerHooks.PlayerPermission += OnPermission;
+
+			_commandHandler = new CommandHandler(_config, _database);
+			_commandHandler.Register();
 		}
 
 		private void OnChat(ServerChatEventArgs e)
 		{
-			throw new NotImplementedException();
+			if (e.Handled)
+			{
+				return;
+			}
+
+			TSPlayer player = TShock.Players[e.Who];
+			if (player == null)
+			{
+				return;
+			}
+
+			PlayerInfo playerData = player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
+			if (!e.Text.StartsWith(TShock.Config.CommandSpecifier) && !e.Text.StartsWith(TShock.Config.CommandSilentSpecifier))
+			{
+				string prefix = playerData?.ChatData?.Prefix ?? player.Group.Prefix;
+				string suffix = playerData?.ChatData?.Suffix ?? player.Group.Suffix;
+				Color chatColor = playerData?.ChatData.Color?.ParseColor() ?? player.Group.ChatColor.ParseColor();
+
+				if (!TShock.Config.EnableChatAboveHeads)
+				{
+					string message = string.Format(TShock.Config.ChatFormat, player.Group.Name, prefix, player.Name, suffix, e.Text);
+					TSPlayer.All.SendMessage(message, chatColor);
+					TSPlayer.Server.SendMessage(message, chatColor);
+					TShock.Log.Info($"Broadcast: {message}");
+
+					e.Handled = true;
+				}
+			}
 		}
 
 		private void OnPostLogin(PlayerPostLoginEventArgs e)
@@ -106,7 +135,7 @@ namespace UserSpecificFunctions
 
 		private void OnPermission(PlayerPermissionEventArgs e)
 		{
-			throw new NotImplementedException();
+			//throw new NotImplementedException();
 		}
 	}
 }

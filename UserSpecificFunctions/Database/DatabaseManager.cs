@@ -74,7 +74,7 @@ namespace UserSpecificFunctions.Database
 		/// <returns>The <see cref="PlayerInfo"/> object associated with the user.</returns>
 		public PlayerInfo Get(int userId)
 		{
-			using (var result = db.QueryReader("SELECT * FROM UserSpecificFunctions Where UserID = @0;"))
+			using (var result = db.QueryReader("SELECT * FROM UserSpecificFunctions WHERE UserID = @0;", userId))
 			{
 				if (result.Read())
 				{
@@ -99,7 +99,7 @@ namespace UserSpecificFunctions.Database
 		/// </summary>
 		/// <param name="playerInfo">The <see cref="PlayerInfo"/> object.</param>
 		/// <param name="updateType">The update type.</param>
-		public void UpdateDatabase(PlayerInfo playerInfo, UpdateType updateType)
+		public void Update(PlayerInfo playerInfo, UpdateType updateType)
 		{
 			if (updateType == 0)
 			{
@@ -109,22 +109,29 @@ namespace UserSpecificFunctions.Database
 			List<string> updates = new List<string>();
 			if ((updateType & UpdateType.Prefix) == UpdateType.Prefix)
 			{
-				updates.Add($"Prefix = {playerInfo.ChatData.Prefix}");
+				updates.Add($"Prefix = '{playerInfo.ChatData.Prefix}'");
 			}
 			if ((updateType & UpdateType.Suffix) == UpdateType.Suffix)
 			{
-				updates.Add($"Suffix = {playerInfo.ChatData.Suffix}");
+				updates.Add($"Suffix = '{playerInfo.ChatData.Suffix}'");
 			}
 			if ((updateType & UpdateType.Color) == UpdateType.Color)
 			{
-				updates.Add($"Color = {playerInfo.ChatData.Color}");
+				updates.Add($"Color = '{playerInfo.ChatData.Color}'");
 			}
 			if ((updateType & UpdateType.Permissions) == UpdateType.Permissions)
 			{
-				updates.Add($"Permissions = {playerInfo.Permissions.ToString()}");
+				updates.Add($"Permissions = '{playerInfo.Permissions.ToString()}'");
 			}
 
 			db.Query($"UPDATE UserSpecificFunctions SET {string.Join(", ", updates)} WHERE UserID = {playerInfo.UserId}");
+
+			// Check if the player is online and update accordingly
+			TSPlayer player = TShock.Players.FirstOrDefault(p => p?.User?.ID == playerInfo.UserId);
+			if (player != null)
+			{
+				player.SetData(PlayerInfo.Data_Key, playerInfo);
+			}
 		}
 	}
 }

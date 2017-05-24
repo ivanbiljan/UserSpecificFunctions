@@ -210,11 +210,11 @@ namespace UserSpecificFunctions
 			{
 				e.Parameters.RemoveRange(0, 2);
 				string prefix = string.Join(" ", e.Parameters);
-				if (prefix.Length > _config.MaximumPrefixLength)
-				{
-					e.Player.SendErrorMessage($"Your prefix cannot be longer than {_config.MaximumPrefixLength} characters.");
-					return;
-				}
+				//if (prefix.Length > _config.MaximumPrefixLength)
+				//{
+				//	e.Player.SendErrorMessage($"Your prefix cannot be longer than {_config.MaximumPrefixLength} characters.");
+				//	return;
+				//}
 
 				IEnumerable<string> matches = _config.ProhibitedWords.Where(p => prefix.ToLowerInvariant().Contains(p.ToLowerInvariant()));
 				if (matches.Any())
@@ -223,17 +223,19 @@ namespace UserSpecificFunctions
 					return;
 				}
 
-				PlayerInfo target;
+				//PlayerInfo target;
 
-				TSPlayer player = TShock.Players.FirstOrDefault(p => p.User == users[0]);
-				if (player != null && player.GetData<PlayerInfo>(PlayerInfo.Data_Key) != null)
-				{
-					target = player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
-				}
-				else
-				{
-					target = _database.Get(users[0]);
-				}
+				//TSPlayer player = TShock.Players.FirstOrDefault(p => p?.User == users[0]);
+				//if (player != null && player.GetData<PlayerInfo>(PlayerInfo.Data_Key) != null)
+				//{
+				//	target = player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
+				//}
+				//else
+				//{
+				//	target = _database.Get(users[0]);
+				//}
+
+				PlayerInfo target = _database.Get(users[0]);
 
 				if (target == null)
 				{
@@ -249,7 +251,7 @@ namespace UserSpecificFunctions
 				else
 				{
 					target.ChatData.Prefix = prefix;
-					_database.UpdateDatabase(target, UpdateType.Prefix);
+					_database.Update(target, UpdateType.Prefix);
 				}
 
 				e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
@@ -290,11 +292,11 @@ namespace UserSpecificFunctions
 			{
 				e.Parameters.RemoveRange(0, 2);
 				string suffix = string.Join(" ", e.Parameters);
-				if (suffix.Length > _config.MaximumSuffixLength)
-				{
-					e.Player.SendErrorMessage($"Your suffix cannot be longer than {_config.MaximumSuffixLength} characters.");
-					return;
-				}
+				//if (suffix.Length > _config.MaximumSuffixLength)
+				//{
+				//	e.Player.SendErrorMessage($"Your suffix cannot be longer than {_config.MaximumSuffixLength} characters.");
+				//	return;
+				//}
 
 				IEnumerable<string> matches = _config.ProhibitedWords.Where(p => suffix.ToLowerInvariant().Contains(p.ToLowerInvariant()));
 				if (matches.Any())
@@ -303,17 +305,19 @@ namespace UserSpecificFunctions
 					return;
 				}
 
-				PlayerInfo target;
+				//PlayerInfo target;
 
-				TSPlayer player = TShock.Players.FirstOrDefault(p => p.User == users[0]);
-				if (player != null && player.GetData<PlayerInfo>(PlayerInfo.Data_Key) != null)
-				{
-					target = player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
-				}
-				else
-				{
-					target = _database.Get(users[0]);
-				}
+				//TSPlayer player = TShock.Players.FirstOrDefault(p => p?.User == users[0]);
+				//if (player != null && player.GetData<PlayerInfo>(PlayerInfo.Data_Key) != null)
+				//{
+				//	target = player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
+				//}
+				//else
+				//{
+				//	target = _database.Get(users[0]);
+				//}
+
+				PlayerInfo target = _database.Get(users[0]);
 
 				if (target == null)
 				{
@@ -329,7 +333,7 @@ namespace UserSpecificFunctions
 				else
 				{
 					target.ChatData.Suffix = suffix;
-					_database.UpdateDatabase(target, UpdateType.Suffix);
+					_database.Update(target, UpdateType.Suffix);
 				}
 
 				e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
@@ -368,20 +372,22 @@ namespace UserSpecificFunctions
 			}
 			else
 			{
-				PlayerInfo target;
+				//PlayerInfo target;
 
 				string[] color = e.Parameters[2].Split(',');
 				if (color.Length == 3 && byte.TryParse(color[0], out byte r) && byte.TryParse(color[1], out byte g) && byte.TryParse(color[2], out byte b))
 				{
-					TSPlayer player = TShock.Players.FirstOrDefault(p => p.User == users[0]);
-					if (player != null && player.GetData<PlayerInfo>(PlayerInfo.Data_Key) != null)
-					{
-						target = player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
-					}
-					else
-					{
-						target = _database.Get(users[0]);
-					}
+					//TSPlayer player = TShock.Players.FirstOrDefault(p => p?.User == users[0]);
+					//if (player != null && player.GetData<PlayerInfo>(PlayerInfo.Data_Key) != null)
+					//{
+					//	target = player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
+					//}
+					//else
+					//{
+					//	target = _database.Get(users[0]);
+					//}
+
+					PlayerInfo target = _database.Get(users[0]);
 
 					if (target == null)
 					{
@@ -397,7 +403,7 @@ namespace UserSpecificFunctions
 					else
 					{
 						target.ChatData.Color = e.Parameters[2];
-						_database.UpdateDatabase(target, UpdateType.Color);
+						_database.Update(target, UpdateType.Color);
 					}
 
 					e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");

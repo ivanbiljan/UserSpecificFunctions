@@ -19,6 +19,11 @@ namespace UserSpecificFunctions.Extensions
 		/// <returns>A <see cref="Color"/> object.</returns>
 		public static Color ParseColor(this string color)
 		{
+			if (color == null)
+			{
+				throw new ArgumentNullException(nameof(color));
+			}
+
 			byte r, g, b;
 			string[] colorPayload = color.Split(',');
 			if (colorPayload.Length != 3)
