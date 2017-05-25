@@ -133,10 +133,10 @@ namespace UserSpecificFunctions.Permissions
 		/// <returns>True or false.</returns>
 		public bool ContainsPermission(string permission)
 		{
-			//if (string.IsNullOrWhiteSpace(permission))
-			//{
-			//	return true;
-			//}
+			if (string.IsNullOrWhiteSpace(permission))
+			{
+				return true;
+			}
 
 			//if (permission.StartsWith("!"))
 			//{

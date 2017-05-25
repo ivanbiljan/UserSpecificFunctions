@@ -8,6 +8,7 @@ using TShockAPI.DB;
 using UserSpecificFunctions.Models;
 using UserSpecificFunctions.Permissions;
 using UserSpecificFunctions.Database;
+using Microsoft.Xna.Framework;
 
 namespace UserSpecificFunctions
 {
@@ -68,8 +69,8 @@ namespace UserSpecificFunctions
 
 				PlayerInfo playerInfo = e.Player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
 				IEnumerable<string> cmdNames = from cmd in Commands.ChatCommands
-											   where cmd.CanRun(e.Player) && (!playerInfo.Permissions.ContainsPermission(cmd.Permissions[0]?.ToString()))
-											   || ((playerInfo?.Permissions.ContainsPermission(cmd.Permissions[0]?.ToString()) ?? true) && (cmd.Name != "auth" || TShock.AuthToken != 0))
+											   where cmd.CanRun(e.Player) && (!playerInfo?.Permissions.ContainsPermission(cmd.Permissions.ElementAtOrDefault(0)) ?? true)
+											   || ((playerInfo?.Permissions.ContainsPermission(cmd.Permissions.ElementAtOrDefault(0)) ?? true) && (cmd.Name != "auth" || TShock.AuthToken != 0))
 											   orderby cmd.Name
 											   select TShock.Config.CommandSpecifier + cmd.Name;
 
@@ -132,6 +133,12 @@ namespace UserSpecificFunctions
 				case "color":
 				case "colour":
 					HandleSetColor(e);
+					break;
+				case "remove":
+					HandleRemoveCustomData(e);
+					break;
+				case "read":
+					HandleGetPlayerData(e);
 					break;
 			}
 		}
@@ -434,6 +441,151 @@ namespace UserSpecificFunctions
 				else
 				{
 					e.Player.SendErrorMessage("Invalid color format!");
+				}
+			}
+		}
+
+		private void HandleRemoveCustomData(CommandArgs e)
+		{
+			if (!e.Player.IsLoggedIn && e.Player.RealPlayer)
+			{
+				e.Player.SendErrorMessage("You must be logged in to do that.");
+				return;
+			}
+
+			if (e.Parameters.Count != 3)
+			{
+				e.Player.SendErrorMessage($"Invalid syntax: {Commands.Specifier}us remove <player name> <prefix/suffix/color>");
+				return;
+			}
+
+			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			if (users.Count == 0)
+			{
+				e.Player.SendErrorMessage("Invalid player!");
+				return;
+			}
+			else if (users.Count > 1)
+			{
+				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(p => p.Name));
+				return;
+			}
+			else if (users[0].Name != e.Player.User.Name && !e.Player.HasPermission("us.setother"))
+			{
+				e.Player.SendErrorMessage("You can't modify this player's chat data.");
+				return;
+			}
+			else
+			{
+				PlayerInfo target = _database.Get(users[0]);
+
+				if (target == null)
+				{
+					e.Player.SendErrorMessage("This user has no custom chat data.");
+					return;
+				}
+
+				switch (e.Parameters[2].ToLowerInvariant())
+				{
+					case "prefix":
+						{
+							if (!e.Player.HasPermission("us.remove.prefix"))
+							{
+								e.Player.SendErrorMessage("You do not have access to this command.");
+								return;
+							}
+							else
+							{
+								target.ChatData.Prefix = null;
+								_database.Update(target, UpdateType.Prefix);
+								e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
+							}
+						}
+						break;
+					case "suffix":
+						{
+							if (!e.Player.HasPermission("us.remove.suffix"))
+							{
+								e.Player.SendErrorMessage("You do not have access to this command.");
+								return;
+							}
+							else
+							{
+								target.ChatData.Suffix = null;
+								_database.Update(target, UpdateType.Suffix);
+								e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
+							}
+						}
+						break;
+					case "color":
+					case "colour":
+						{
+							if (!e.Player.HasPermission("us.remove.color"))
+							{
+								e.Player.SendErrorMessage("You do not have access to this command.");
+								return;
+							}
+							else
+							{
+								target.ChatData.Color = null;
+								_database.Update(target, UpdateType.Color);
+								e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
+							}
+						}
+						break;
+					case "all":
+						{
+							if (!e.Player.HasPermission("us.resetall"))
+							{
+								e.Player.SendErrorMessage("You do not have access to this command.");
+								return;
+							}
+							else
+							{
+								target.ChatData = new ChatData();
+								_database.Update(target, UpdateType.Prefix | UpdateType.Suffix | UpdateType.Color);
+								e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
+							}
+						}
+						break;
+				}
+			}
+		}
+
+		private void HandleGetPlayerData(CommandArgs e)
+		{
+			if (e.Parameters.Count != 2)
+			{
+				e.Player.SendErrorMessage($"Invalid syntax! Proper syntax: {Commands.Specifier}us read <player name>");
+				return;
+			}
+
+			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			if (users.Count == 0)
+			{
+				e.Player.SendErrorMessage("Invalid player!");
+				return;
+			}
+			else if (users.Count > 1)
+			{
+				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(p => p.Name));
+				return;
+			}
+			else
+			{
+				PlayerInfo target = _database.Get(users[0]);
+
+				if (target == null)
+				{
+					e.Player.SendErrorMessage("This user has no player specific information to read.");
+					return;
+				}
+				else
+				{
+					e.Player.SendMessage($"Username: {users[0].Name}", Color.LawnGreen);
+					e.Player.SendMessage($"  * Prefix: {target.ChatData.Prefix ?? "None"}", Color.LawnGreen);
+					e.Player.SendMessage($"  * Suffix: {target.ChatData.Suffix ?? "None"}", Color.LawnGreen);
+					e.Player.SendMessage($"  * Chat color: {target.ChatData.Color ?? "None"}", Color.LawnGreen);
 				}
 			}
 		}

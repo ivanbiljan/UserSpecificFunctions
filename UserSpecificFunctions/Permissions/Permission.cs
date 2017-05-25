@@ -19,7 +19,7 @@ namespace UserSpecificFunctions.Permissions
 		/// <summary>
 		/// Gets the value indicating whether the permission is negated or not.
 		/// </summary>
-		public bool Negated { get; set; }
+		public bool Negated { get; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Permission"/> class.

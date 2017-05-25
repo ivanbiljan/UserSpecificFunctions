@@ -13,17 +13,17 @@ namespace UserSpecificFunctions.Models
 	public sealed class ChatData
 	{
 		/// <summary>
-		/// The chat prefix.
+		/// Gets or sets the user's chat prefix.
 		/// </summary>
 		public string Prefix { get; set; }
 
 		/// <summary>
-		/// The chat suffix.
+		/// Gets or sets the user's chat suffix.
 		/// </summary>
 		public string Suffix { get; set; }
 
 		/// <summary>
-		/// The chat color.
+		/// Gets or sets the user's chat color.
 		/// </summary>
 		public string Color { get; set; }
 

@@ -21,7 +21,7 @@ namespace UserSpecificFunctions.Models
 		public int UserId { get; set; }
 
 		/// <summary>
-		/// Gets the <see cref="UserSpecificFunctions.Models.ChatData"/> instance associated with this instance.
+		/// Gets the <see cref="UserSpecificFunctions.Models.ChatData"/> instance associated with this <see cref="PlayerInfo"/> instance.
 		/// </summary>
 		public ChatData ChatData { get; set; }
 
