@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TShockAPI.DB;
 using UserSpecificFunctions.Permissions;
@@ -64,7 +64,7 @@ namespace UserSpecificFunctions.Models
 					Suffix = result.Get<string>("Suffix"),
 					Color = result.Get<string>("Color")
 				},
-				Permissions = new PermissionCollection(result.Get<string>("Permissions").Split(','))
+				Permissions = new PermissionCollection(Regex.Replace(result.Get<string>("Permissions"), @"\s+", "").Split(','))
 			};
 		}
 	}

@@ -135,7 +135,13 @@ namespace UserSpecificFunctions
 
 		private void OnPermission(PlayerPermissionEventArgs e)
 		{
-			//throw new NotImplementedException();
+			if (e.Player == null || !e.Player.IsLoggedIn || !e.Player.ContainsData(PlayerInfo.Data_Key))
+			{
+				return;
+			}
+
+			PlayerInfo info = e.Player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
+			e.Handled = info.Permissions.ContainsPermission(e.Permission);
 		}
 	}
 }
