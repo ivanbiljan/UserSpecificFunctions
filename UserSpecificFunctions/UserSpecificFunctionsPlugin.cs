@@ -2,6 +2,9 @@
 using System.IO;
 using System.Reflection;
 using Terraria;
+using Terraria.Localization;
+using Terraria.Net;
+using Terraria.GameContent.NetModules;
 using TerrariaApi.Server;
 using TShockAPI;
 using TShockAPI.Hooks;
@@ -115,6 +118,28 @@ namespace UserSpecificFunctions
 					TSPlayer.All.SendMessage(message, chatColor);
 					TSPlayer.Server.SendMessage(message, chatColor);
 					TShock.Log.Info($"Broadcast: {message}");
+
+					e.Handled = true;
+				}
+				else
+				{
+					string playerName = player.TPlayer.name;
+					player.TPlayer.name = string.Format(TShock.Config.ChatAboveHeadsFormat, player.Group.Name, prefix, player.Name, suffix);
+					NetMessage.SendData((int)PacketTypes.PlayerInfo, -1, -1, NetworkText.FromLiteral(player.TPlayer.name), e.Who);
+
+					player.TPlayer.name = playerName;
+
+					NetPacket packet = NetTextModule.SerializeServerMessage(NetworkText.FromLiteral(e.Text), chatColor, (byte)e.Who);
+					NetManager.Instance.Broadcast(packet, e.Who);
+
+					NetMessage.SendData((int)PacketTypes.PlayerInfo, -1, -1, NetworkText.FromLiteral(playerName), e.Who);
+
+					string msg = string.Format("<{0}> {1}", string.Format(TShock.Config.ChatAboveHeadsFormat, player.Group.Name,
+						prefix, player.Name, suffix), e.Text);
+
+					player.SendMessage(msg, chatColor);
+					TSPlayer.Server.SendMessage(msg, chatColor);
+					TShock.Log.Info($"Broadcast: {msg}");
 
 					e.Handled = true;
 				}
