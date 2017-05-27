@@ -21,9 +21,17 @@ namespace UserSpecificFunctions
     {
 		private static readonly string ConfigPath = Path.Combine(TShock.SavePath, "userspecificfunctions.json");
 
-		private readonly DatabaseManager _database = new DatabaseManager();
-		private Config _config = new Config();
 		private CommandHandler _commandHandler;
+
+		/// <summary>
+		/// Gets the <see cref="Config"/> instance.
+		/// </summary>
+		public Config Configuration { get; private set; } = new Config();
+
+		/// <summary>
+		/// Gets the <see cref="DatabaseManager"/> instance.
+		/// </summary>
+		public DatabaseManager Database { get; } = new DatabaseManager();
 
 		/// <summary>
 		/// Gets the author.
@@ -63,7 +71,7 @@ namespace UserSpecificFunctions
 			if (disposing)
 			{
 				_commandHandler.Deregister();
-				File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(_config, Formatting.Indented));
+				File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(Configuration, Formatting.Indented));
 
 				ServerApi.Hooks.ServerChat.Deregister(this, OnChat);
 				PlayerHooks.PlayerPostLogin -= OnPostLogin;
@@ -78,17 +86,17 @@ namespace UserSpecificFunctions
 		/// </summary>
 		public override void Initialize()
 		{
-			_database.Connect();
+			Database.Connect();
 			if (File.Exists(ConfigPath))
 			{
-				_config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(ConfigPath));
+				Configuration = JsonConvert.DeserializeObject<Config>(File.ReadAllText(ConfigPath));
 			}
 
 			ServerApi.Hooks.ServerChat.Register(this, OnChat);
 			PlayerHooks.PlayerPostLogin += OnPostLogin;
 			PlayerHooks.PlayerPermission += OnPermission;
 
-			_commandHandler = new CommandHandler(_config, _database);
+			_commandHandler = new CommandHandler(this);
 			_commandHandler.Register();
 		}
 
@@ -148,7 +156,7 @@ namespace UserSpecificFunctions
 
 		private void OnPostLogin(PlayerPostLoginEventArgs e)
 		{
-			PlayerInfo playerInfo = _database.Get(e.Player.User);
+			PlayerInfo playerInfo = Database.Get(e.Player.User);
 			if (playerInfo != null)
 			{
 				e.Player.SetData(PlayerInfo.Data_Key, playerInfo);

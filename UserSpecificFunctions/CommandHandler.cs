@@ -14,18 +14,15 @@ namespace UserSpecificFunctions
 	/// </summary>
 	public sealed class CommandHandler
 	{
-		private readonly Config _config;
-		private readonly DatabaseManager _database;
+		private readonly UserSpecificFunctionsPlugin _plugin;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CommandHandler"/> class.
 		/// </summary>
-		/// <param name="config">The <see cref="Config"/> instance.</param>
-		/// <param name="databaseManager">The <see cref="DatabaseManager"/> instance.</param>
-		public CommandHandler(Config config, DatabaseManager databaseManager)
+		/// <param name="plugin">The <see cref="UserSpecificFunctionsPlugin"/> instance.</param>
+		public CommandHandler(UserSpecificFunctionsPlugin plugin)
 		{
-			_config = config;
-			_database = databaseManager;
+			_plugin = plugin;
 		}
 
 		/// <summary>
@@ -243,7 +240,7 @@ namespace UserSpecificFunctions
 				//	return;
 				//}
 
-				IEnumerable<string> matches = _config.ProhibitedWords.Where(p => prefix.ToLowerInvariant().Contains(p.ToLowerInvariant()));
+				IEnumerable<string> matches = _plugin.Configuration.ProhibitedWords.Where(p => prefix.ToLowerInvariant().Contains(p.ToLowerInvariant()));
 				if (matches.Any())
 				{
 					e.Player.SendErrorMessage($"Your chat prefix cannot contain the following word(s): {string.Join(", ", matches)}");
@@ -262,7 +259,7 @@ namespace UserSpecificFunctions
 				//	target = _database.Get(users[0]);
 				//}
 
-				PlayerInfo target = _database.Get(users[0]);
+				PlayerInfo target = _plugin.Database.Get(users[0]);
 
 				if (target == null)
 				{
@@ -273,12 +270,12 @@ namespace UserSpecificFunctions
 						Permissions = new PermissionCollection()
 					};
 
-					_database.Add(target);
+					_plugin.Database.Add(target);
 				}
 				else
 				{
 					target.ChatData.Prefix = prefix;
-					_database.Update(target, UpdateType.Prefix);
+					_plugin.Database.Update(target, UpdateType.Prefix);
 				}
 
 				e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
@@ -325,7 +322,7 @@ namespace UserSpecificFunctions
 				//	return;
 				//}
 
-				IEnumerable<string> matches = _config.ProhibitedWords.Where(p => suffix.ToLowerInvariant().Contains(p.ToLowerInvariant()));
+				IEnumerable<string> matches = _plugin.Configuration.ProhibitedWords.Where(p => suffix.ToLowerInvariant().Contains(p.ToLowerInvariant()));
 				if (matches.Any())
 				{
 					e.Player.SendErrorMessage($"Your chat suffix cannot contain the following word(s): {string.Join(", ", matches)}");
@@ -344,7 +341,7 @@ namespace UserSpecificFunctions
 				//	target = _database.Get(users[0]);
 				//}
 
-				PlayerInfo target = _database.Get(users[0]);
+				PlayerInfo target = _plugin.Database.Get(users[0]);
 
 				if (target == null)
 				{
@@ -355,12 +352,12 @@ namespace UserSpecificFunctions
 						Permissions = new PermissionCollection()
 					};
 
-					_database.Add(target);
+					_plugin.Database.Add(target);
 				}
 				else
 				{
 					target.ChatData.Suffix = suffix;
-					_database.Update(target, UpdateType.Suffix);
+					_plugin.Database.Update(target, UpdateType.Suffix);
 				}
 
 				e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
@@ -414,7 +411,7 @@ namespace UserSpecificFunctions
 					//	target = _database.Get(users[0]);
 					//}
 
-					PlayerInfo target = _database.Get(users[0]);
+					PlayerInfo target = _plugin.Database.Get(users[0]);
 
 					if (target == null)
 					{
@@ -425,12 +422,12 @@ namespace UserSpecificFunctions
 							Permissions = new PermissionCollection()
 						};
 
-						_database.Add(target);
+						_plugin.Database.Add(target);
 					}
 					else
 					{
 						target.ChatData.Color = e.Parameters[2];
-						_database.Update(target, UpdateType.Color);
+						_plugin.Database.Update(target, UpdateType.Color);
 					}
 
 					e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
@@ -474,7 +471,7 @@ namespace UserSpecificFunctions
 			}
 			else
 			{
-				PlayerInfo target = _database.Get(users[0]);
+				PlayerInfo target = _plugin.Database.Get(users[0]);
 
 				if (target == null)
 				{
@@ -494,7 +491,7 @@ namespace UserSpecificFunctions
 							else
 							{
 								target.ChatData.Prefix = null;
-								_database.Update(target, UpdateType.Prefix);
+								_plugin.Database.Update(target, UpdateType.Prefix);
 								e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
 							}
 						}
@@ -509,7 +506,7 @@ namespace UserSpecificFunctions
 							else
 							{
 								target.ChatData.Suffix = null;
-								_database.Update(target, UpdateType.Suffix);
+								_plugin.Database.Update(target, UpdateType.Suffix);
 								e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
 							}
 						}
@@ -525,7 +522,7 @@ namespace UserSpecificFunctions
 							else
 							{
 								target.ChatData.Color = null;
-								_database.Update(target, UpdateType.Color);
+								_plugin.Database.Update(target, UpdateType.Color);
 								e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
 							}
 						}
@@ -540,7 +537,7 @@ namespace UserSpecificFunctions
 							else
 							{
 								target.ChatData = new ChatData();
-								_database.Update(target, UpdateType.Prefix | UpdateType.Suffix | UpdateType.Color);
+								_plugin.Database.Update(target, UpdateType.Prefix | UpdateType.Suffix | UpdateType.Color);
 								e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
 							}
 						}
@@ -570,7 +567,7 @@ namespace UserSpecificFunctions
 			}
 			else
 			{
-				PlayerInfo target = _database.Get(users[0]);
+				PlayerInfo target = _plugin.Database.Get(users[0]);
 
 				if (target == null)
 				{
@@ -609,7 +606,7 @@ namespace UserSpecificFunctions
 			else
 			{
 				e.Parameters.RemoveRange(0, 2);
-				PlayerInfo target = _database.Get(users[0]);
+				PlayerInfo target = _plugin.Database.Get(users[0]);
 
 				if (target == null)
 				{
@@ -619,11 +616,13 @@ namespace UserSpecificFunctions
 						ChatData = new ChatData(),
 						Permissions = new PermissionCollection(e.Parameters)
 					};
+
+					_plugin.Database.Add(target);
 				}
 				else
 				{
 					e.Parameters.ForEach(p => target.Permissions.AddPermission(p));
-					_database.Update(target, UpdateType.Permissions);
+					_plugin.Database.Update(target, UpdateType.Permissions);
 				}
 
 				e.Player.SendSuccessMessage($"Modified {users[0].Name}'s permissions successfully.");
@@ -652,7 +651,7 @@ namespace UserSpecificFunctions
 			else
 			{
 				e.Parameters.RemoveRange(0, 2);
-				PlayerInfo target = _database.Get(users[0]);
+				PlayerInfo target = _plugin.Database.Get(users[0]);
 
 				if (target == null)
 				{
@@ -662,7 +661,7 @@ namespace UserSpecificFunctions
 				else
 				{
 					e.Parameters.ForEach(p => target.Permissions.RemovePermission(p));
-					_database.Update(target, UpdateType.Permissions);
+					_plugin.Database.Update(target, UpdateType.Permissions);
 				}
 
 				e.Player.SendSuccessMessage($"Modified {users[0].Name}'s permissions successfully.");
@@ -690,16 +689,11 @@ namespace UserSpecificFunctions
 			}
 			else
 			{
-				PlayerInfo target = _database.Get(users[0]);
+				PlayerInfo target = _plugin.Database.Get(users[0]);
 
 				if (target == null || target.Permissions.Count == 0)
 				{
 					e.Player.SendErrorMessage("This user has no permissions to list.");
-					return;
-				}
-
-				if (!PaginationTools.TryParsePageNumber(e.Parameters, 2, e.Player, out int pageNumber))
-				{
 					return;
 				}
 
