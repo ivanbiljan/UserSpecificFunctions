@@ -15,11 +15,11 @@ namespace UserSpecificFunctions
 		/// <summary>
 		/// Gets the maximum prefix length.
 		/// </summary>
-		public int MaximumPrefixLength { get; }
+		public int MaximumPrefixLength { get; } = 10;
 
 		/// <summary>
 		/// Gets the maximum suffix length.
 		/// </summary>
-		public int MaximumSuffixLength { get; }
+		public int MaximumSuffixLength { get; } = 10;
 	}
 }

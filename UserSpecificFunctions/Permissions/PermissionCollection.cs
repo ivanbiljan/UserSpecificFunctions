@@ -10,7 +10,7 @@ namespace UserSpecificFunctions.Permissions
 	/// </summary>
 	public sealed class PermissionCollection : ICollection
 	{
-		private List<Permission> _permissions;
+		private readonly List<Permission> _permissions;
 
 		/// <summary>
 		/// Gets the number of elements in the collection.

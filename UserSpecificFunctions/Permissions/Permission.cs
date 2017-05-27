@@ -19,7 +19,6 @@
 		/// Initializes a new instance of the <see cref="Permission"/> class.
 		/// </summary>
 		/// <param name="name">The permission's name.</param>
-		/// <param name="negated">The permission's negation flag.</param>
 		public Permission(string name)
 		{
 			if (name.StartsWith("!"))
@@ -57,10 +56,10 @@
 			return false;
 		}
 
-		public bool Equals(string permission)
+		public bool Equals(string permissionName)
 		{
-			Permission _permission = new Permission(permission);
-			return this.Equals(_permission);
+			Permission permission = new Permission(permissionName);
+			return this.Equals(permission);
 		}
 	}
 }

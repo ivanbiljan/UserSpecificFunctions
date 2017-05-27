@@ -19,7 +19,7 @@ namespace UserSpecificFunctions
 	[ApiVersion(2, 1)]
     public sealed class UserSpecificFunctionsPlugin : TerrariaPlugin
     {
-		private static readonly string configPath = Path.Combine(TShock.SavePath, "userspecificfunctions.json");
+		private static readonly string ConfigPath = Path.Combine(TShock.SavePath, "userspecificfunctions.json");
 
 		private readonly DatabaseManager _database = new DatabaseManager();
 		private Config _config = new Config();
@@ -63,7 +63,7 @@ namespace UserSpecificFunctions
 			if (disposing)
 			{
 				_commandHandler.Deregister();
-				File.WriteAllText(configPath, JsonConvert.SerializeObject(_config, Formatting.Indented));
+				File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(_config, Formatting.Indented));
 
 				ServerApi.Hooks.ServerChat.Deregister(this, OnChat);
 				PlayerHooks.PlayerPostLogin -= OnPostLogin;
@@ -79,9 +79,9 @@ namespace UserSpecificFunctions
 		public override void Initialize()
 		{
 			_database.Connect();
-			if (File.Exists(configPath))
+			if (File.Exists(ConfigPath))
 			{
-				_config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(configPath));
+				_config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(ConfigPath));
 			}
 
 			ServerApi.Hooks.ServerChat.Register(this, OnChat);
@@ -108,8 +108,8 @@ namespace UserSpecificFunctions
 			PlayerInfo playerData = player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
 			if (!e.Text.StartsWith(TShock.Config.CommandSpecifier) && !e.Text.StartsWith(TShock.Config.CommandSilentSpecifier))
 			{
-				string prefix = playerData?.ChatData?.Prefix ?? player.Group.Prefix;
-				string suffix = playerData?.ChatData?.Suffix ?? player.Group.Suffix;
+				string prefix = playerData?.ChatData.Prefix ?? player.Group.Prefix;
+				string suffix = playerData?.ChatData.Suffix ?? player.Group.Suffix;
 				Color chatColor = playerData?.ChatData.Color?.ParseColor() ?? player.Group.ChatColor.ParseColor();
 
 				if (!TShock.Config.EnableChatAboveHeads)

@@ -197,7 +197,7 @@ namespace UserSpecificFunctions
 				PaginationTools.SendPage(e.Player, pageNum, help.Keys.Select(p => $"{p} - {help[p]}"), help.Count,
 					new PaginationTools.Settings()
 					{
-						HeaderFormat = $"UserSpecificFunctions Help({{0}}/{{1}})",
+						HeaderFormat = $"UserSpecificFunctions Help ({{0}}/{{1}})",
 						FooterFormat = $"Type {Commands.Specifier}us help {{0}} for more."
 					});
 			}
