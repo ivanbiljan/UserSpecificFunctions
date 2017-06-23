@@ -8,7 +8,7 @@
 		/// <summary>
 		/// Gets the permissions's name.
 		/// </summary>
-		public string Name { get; set; }
+		public string Name { get; }
 
 		/// <summary>
 		/// Gets the value indicating whether the permission is negated or not.
@@ -35,31 +35,27 @@
 		/// </summary>
 		/// <param name="obj">The object.</param>
 		/// <returns>True or false.</returns>
-		public override bool Equals(object obj)
+		public override bool Equals(object obj) => obj is Permission permission && Equals(permission);
+
+		/// <inheritdoc />
+		private bool Equals(Permission other)
 		{
-			if (obj == null)
-			{
-				return false;
-			}
+			return string.Equals(Name, other.Name) && Negated == other.Negated;
+		}
 
-			if (GetType() != obj.GetType())
+		/// <inheritdoc />
+		public override int GetHashCode()
+		{
+			unchecked
 			{
-				return false;
+				return ((Name != null ? Name.GetHashCode() : 0) * 397) ^ Negated.GetHashCode();
 			}
-
-			Permission permission = (Permission)obj;
-			if (this.Name == permission.Name && this.Negated == permission.Negated)
-			{
-				return true;
-			}
-
-			return false;
 		}
 
 		public bool Equals(string permissionName)
 		{
-			Permission permission = new Permission(permissionName);
-			return this.Equals(permission);
+			var permission = new Permission(permissionName);
+			return Equals(permission);
 		}
 	}
 }

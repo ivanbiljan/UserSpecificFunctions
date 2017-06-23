@@ -15,7 +15,7 @@ namespace UserSpecificFunctions.Database
 	/// </summary>
 	public sealed class DatabaseManager
 	{
-		private static IDbConnection db;
+		private static IDbConnection _db;
 
 		/// <summary>
 		/// Connects the database.
@@ -26,7 +26,7 @@ namespace UserSpecificFunctions.Database
 			{
 				case "mysql":
 					string[] dbHost = TShock.Config.MySqlHost.Split(':');
-					db = new MySqlConnection()
+					_db = new MySqlConnection()
 					{
 						ConnectionString = string.Format("Server={0}; Port={1}; Database={2}; Uid={3}; Pwd={4};",
 							dbHost[0],
@@ -40,11 +40,11 @@ namespace UserSpecificFunctions.Database
 
 				case "sqlite":
 					string sql = Path.Combine(TShock.SavePath, "tshock.sqlite");
-					db = new SqliteConnection(string.Format("uri=file://{0},Version=3", sql));
+					_db = new SqliteConnection(string.Format("uri=file://{0},Version=3", sql));
 					break;
 			}
 
-			SqlTableCreator sqlcreator = new SqlTableCreator(db, db.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
+			SqlTableCreator sqlcreator = new SqlTableCreator(_db, _db.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
 
 			sqlcreator.EnsureTableStructure(new SqlTable("UserSpecificFunctions",
 				new SqlColumn("UserID", MySqlDbType.Int32),
@@ -60,7 +60,7 @@ namespace UserSpecificFunctions.Database
 		/// <param name="playerInfo">The object.</param>
 		public void Add(PlayerInfo playerInfo)
 		{
-			db.Query("INSERT INTO UserSpecificFunctions (UserID, Prefix, Suffix, Color, Permissions) VALUES (@0, @1, @2, @3, @4);",
+			_db.Query("INSERT INTO UserSpecificFunctions (UserID, Prefix, Suffix, Color, Permissions) VALUES (@0, @1, @2, @3, @4);",
 				playerInfo.UserId, playerInfo.ChatData.Prefix, playerInfo.ChatData.Suffix, playerInfo.ChatData.Color, playerInfo.Permissions.ToString());
 		}
 
@@ -71,7 +71,7 @@ namespace UserSpecificFunctions.Database
 		/// <returns>The <see cref="PlayerInfo"/> object associated with the user.</returns>
 		public PlayerInfo Get(int userId)
 		{
-			using (var result = db.QueryReader("SELECT * FROM UserSpecificFunctions WHERE UserID = @0;", userId))
+			using (var result = _db.QueryReader("SELECT * FROM UserSpecificFunctions WHERE UserID = @0;", userId))
 			{
 				if (result.Read())
 				{
@@ -96,39 +96,36 @@ namespace UserSpecificFunctions.Database
 		/// </summary>
 		/// <param name="playerInfo">The <see cref="PlayerInfo"/> object.</param>
 		/// <param name="updateType">The update type.</param>
-		public void Update(PlayerInfo playerInfo, UpdateType updateType)
+		public void Update(PlayerInfo playerInfo, DatabaseUpdate updateType)
 		{
 			if (updateType == 0)
 			{
 				return;
 			}
 
-			List<string> updates = new List<string>();
-			if ((updateType & UpdateType.Prefix) == UpdateType.Prefix)
+			var updates = new List<string>();
+			if ((updateType & DatabaseUpdate.Prefix) == DatabaseUpdate.Prefix)
 			{
 				updates.Add($"Prefix = '{playerInfo.ChatData.Prefix}'");
 			}
-			if ((updateType & UpdateType.Suffix) == UpdateType.Suffix)
+			if ((updateType & DatabaseUpdate.Suffix) == DatabaseUpdate.Suffix)
 			{
 				updates.Add($"Suffix = '{playerInfo.ChatData.Suffix}'");
 			}
-			if ((updateType & UpdateType.Color) == UpdateType.Color)
+			if ((updateType & DatabaseUpdate.Color) == DatabaseUpdate.Color)
 			{
 				updates.Add($"Color = '{playerInfo.ChatData.Color}'");
 			}
-			if ((updateType & UpdateType.Permissions) == UpdateType.Permissions)
+			if ((updateType & DatabaseUpdate.Permissions) == DatabaseUpdate.Permissions)
 			{
 				updates.Add($"Permissions = '{playerInfo.Permissions.ToString()}'");
 			}
 
-			db.Query($"UPDATE UserSpecificFunctions SET {string.Join(", ", updates)} WHERE UserID = {playerInfo.UserId}");
+			_db.Query($"UPDATE UserSpecificFunctions SET {string.Join(", ", updates)} WHERE UserID = {playerInfo.UserId}");
 
 			// Check if the player is online and update accordingly
-			TSPlayer player = TShock.Players.FirstOrDefault(p => p?.User?.ID == playerInfo.UserId);
-			if (player != null)
-			{
-				player.SetData(PlayerInfo.Data_Key, playerInfo);
-			}
+			var player = TShock.Players.FirstOrDefault(p => p?.User?.ID == playerInfo.UserId);
+			player?.SetData(PlayerInfo.DataKey, playerInfo);
 		}
 	}
 }

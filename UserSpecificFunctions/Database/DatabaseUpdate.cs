@@ -3,7 +3,7 @@
 namespace UserSpecificFunctions.Database
 {
 	[Flags]
-	public enum UpdateType
+	public enum DatabaseUpdate
 	{
 		Prefix = 1,
 		Suffix = 2,

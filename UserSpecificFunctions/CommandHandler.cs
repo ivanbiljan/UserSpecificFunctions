@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using TShockAPI;
-using TShockAPI.DB;
 using UserSpecificFunctions.Models;
 using UserSpecificFunctions.Permissions;
 using UserSpecificFunctions.Database;
@@ -61,8 +60,8 @@ namespace UserSpecificFunctions
 					return;
 				}
 
-				PlayerInfo playerInfo = e.Player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
-				IEnumerable<string> cmdNames = from cmd in Commands.ChatCommands
+				var playerInfo = e.Player.GetData<PlayerInfo>(PlayerInfo.DataKey);
+				var cmdNames = from cmd in Commands.ChatCommands
 											   where cmd.CanRun(e.Player) && (!playerInfo?.Permissions.ContainsPermission(cmd.Permissions.ElementAtOrDefault(0)) ?? true)
 											   || ((playerInfo?.Permissions.ContainsPermission(cmd.Permissions.ElementAtOrDefault(0)) ?? true) && (cmd.Name != "auth" || TShock.AuthToken != 0))
 											   orderby cmd.Name
@@ -77,13 +76,13 @@ namespace UserSpecificFunctions
 			}
 			else
 			{
-				string commandName = e.Parameters[0].ToLower();
+				var commandName = e.Parameters[0].ToLower();
 				if (commandName.StartsWith(TShock.Config.CommandSpecifier))
 				{
 					commandName = commandName.Substring(1);
 				}
 
-				Command command = Commands.ChatCommands.Find(c => c.Names.Contains(commandName));
+				var command = Commands.ChatCommands.Find(c => c.Names.Contains(commandName));
 				if (command == null)
 				{
 					e.Player.SendErrorMessage("Invalid command.");
@@ -101,7 +100,7 @@ namespace UserSpecificFunctions
 					e.Player.SendInfoMessage(command.HelpText);
 					return;
 				}
-				foreach (string line in command.HelpDesc)
+				foreach (var line in command.HelpDesc)
 				{
 					e.Player.SendInfoMessage(line);
 				}
@@ -167,7 +166,7 @@ namespace UserSpecificFunctions
 
 		private void SendInvalidSyntax(CommandArgs e)
 		{
-			Dictionary<string, string> help = new Dictionary<string, string>()
+			var help = new Dictionary<string, string>()
 			{
 				{ "prefix", "Sets the player's chat prefix" },
 				{ "suffix", "Sets the player's chat suffix" },
@@ -214,21 +213,18 @@ namespace UserSpecificFunctions
 				return;
 			}
 
-			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			var users = TShock.Users.GetUsersByName(e.Parameters[1]);
 			if (users.Count == 0)
 			{
 				e.Player.SendErrorMessage("Invalid player!");
-				return;
 			}
 			else if (users.Count > 1)
 			{
 				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(p => p.Name));
-				return;
 			}
 			else if (users[0].Name != e.Player.User.Name && !e.Player.HasPermission("us.setother"))
 			{
 				e.Player.SendErrorMessage("You do not have permission to change this player's chat prefix.");
-				return;
 			}
 			else
 			{
@@ -240,7 +236,7 @@ namespace UserSpecificFunctions
 				//	return;
 				//}
 
-				IEnumerable<string> matches = _plugin.Configuration.ProhibitedWords.Where(p => prefix.ToLowerInvariant().Contains(p.ToLowerInvariant()));
+				var matches = _plugin.Configuration.ProhibitedWords.Where(p => prefix.ToLowerInvariant().Contains(p.ToLowerInvariant()));
 				if (matches.Any())
 				{
 					e.Player.SendErrorMessage($"Your chat prefix cannot contain the following word(s): {string.Join(", ", matches)}");
@@ -259,11 +255,11 @@ namespace UserSpecificFunctions
 				//	target = _database.Get(users[0]);
 				//}
 
-				PlayerInfo target = _plugin.Database.Get(users[0]);
+				var target = _plugin.Database.Get(users[0]);
 
 				if (target == null)
 				{
-					target = new PlayerInfo()
+					target = new PlayerInfo
 					{
 						UserId = users[0].ID,
 						ChatData = new ChatData(prefix, null, null),
@@ -275,7 +271,7 @@ namespace UserSpecificFunctions
 				else
 				{
 					target.ChatData.Prefix = prefix;
-					_plugin.Database.Update(target, UpdateType.Prefix);
+					_plugin.Database.Update(target, DatabaseUpdate.Prefix);
 				}
 
 				e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
@@ -296,33 +292,30 @@ namespace UserSpecificFunctions
 				return;
 			}
 
-			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			var users = TShock.Users.GetUsersByName(e.Parameters[1]);
 			if (users.Count == 0)
 			{
 				e.Player.SendErrorMessage("Invalid player!");
-				return;
 			}
 			else if (users.Count > 1)
 			{
 				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(p => p.Name));
-				return;
 			}
 			else if (users[0].Name != e.Player.User.Name && !e.Player.HasPermission("us.setother"))
 			{
 				e.Player.SendErrorMessage("You do not have permission to change this player's chat suffix.");
-				return;
 			}
 			else
 			{
 				e.Parameters.RemoveRange(0, 2);
-				string suffix = string.Join(" ", e.Parameters);
+				var suffix = string.Join(" ", e.Parameters);
 				//if (suffix.Length > _config.MaximumSuffixLength)
 				//{
 				//	e.Player.SendErrorMessage($"Your suffix cannot be longer than {_config.MaximumSuffixLength} characters.");
 				//	return;
 				//}
 
-				IEnumerable<string> matches = _plugin.Configuration.ProhibitedWords.Where(p => suffix.ToLowerInvariant().Contains(p.ToLowerInvariant()));
+				var matches = _plugin.Configuration.ProhibitedWords.Where(p => suffix.ToLowerInvariant().Contains(p.ToLowerInvariant()));
 				if (matches.Any())
 				{
 					e.Player.SendErrorMessage($"Your chat suffix cannot contain the following word(s): {string.Join(", ", matches)}");
@@ -341,11 +334,11 @@ namespace UserSpecificFunctions
 				//	target = _database.Get(users[0]);
 				//}
 
-				PlayerInfo target = _plugin.Database.Get(users[0]);
+				var target = _plugin.Database.Get(users[0]);
 
 				if (target == null)
 				{
-					target = new PlayerInfo()
+					target = new PlayerInfo
 					{
 						UserId = users[0].ID,
 						ChatData = new ChatData(null, suffix, null),
@@ -357,7 +350,7 @@ namespace UserSpecificFunctions
 				else
 				{
 					target.ChatData.Suffix = suffix;
-					_plugin.Database.Update(target, UpdateType.Suffix);
+					_plugin.Database.Update(target, DatabaseUpdate.Suffix);
 				}
 
 				e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
@@ -378,27 +371,24 @@ namespace UserSpecificFunctions
 				return;
 			}
 
-			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			var users = TShock.Users.GetUsersByName(e.Parameters[1]);
 			if (users.Count == 0)
 			{
 				e.Player.SendErrorMessage("Invalid player!");
-				return;
 			}
 			else if (users.Count > 1)
 			{
 				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(p => p.Name));
-				return;
 			}
 			else if (users[0].Name != e.Player.Name && !e.Player.HasPermission("us.setother"))
 			{
 				e.Player.SendErrorMessage("You do not have permission to change this player's chat color.");
-				return;
 			}
 			else
 			{
 				//PlayerInfo target;
 
-				string[] color = e.Parameters[2].Split(',');
+				var color = e.Parameters[2].Split(',');
 				if (color.Length == 3 && byte.TryParse(color[0], out byte r) && byte.TryParse(color[1], out byte g) && byte.TryParse(color[2], out byte b))
 				{
 					//TSPlayer player = TShock.Players.FirstOrDefault(p => p?.User == users[0]);
@@ -411,11 +401,11 @@ namespace UserSpecificFunctions
 					//	target = _database.Get(users[0]);
 					//}
 
-					PlayerInfo target = _plugin.Database.Get(users[0]);
+					var target = _plugin.Database.Get(users[0]);
 
 					if (target == null)
 					{
-						target = new PlayerInfo()
+						target = new PlayerInfo
 						{
 							UserId = users[0].ID,
 							ChatData = new ChatData(null, null, e.Parameters[2]),
@@ -427,7 +417,7 @@ namespace UserSpecificFunctions
 					else
 					{
 						target.ChatData.Color = e.Parameters[2];
-						_plugin.Database.Update(target, UpdateType.Color);
+						_plugin.Database.Update(target, DatabaseUpdate.Color);
 					}
 
 					e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
@@ -453,25 +443,22 @@ namespace UserSpecificFunctions
 				return;
 			}
 
-			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			var users = TShock.Users.GetUsersByName(e.Parameters[1]);
 			if (users.Count == 0)
 			{
 				e.Player.SendErrorMessage("Invalid player!");
-				return;
 			}
 			else if (users.Count > 1)
 			{
 				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(p => p.Name));
-				return;
 			}
 			else if (users[0].Name != e.Player.User.Name && !e.Player.HasPermission("us.setother"))
 			{
 				e.Player.SendErrorMessage("You can't modify this player's chat data.");
-				return;
 			}
 			else
 			{
-				PlayerInfo target = _plugin.Database.Get(users[0]);
+				var target = _plugin.Database.Get(users[0]);
 
 				if (target == null)
 				{
@@ -486,12 +473,11 @@ namespace UserSpecificFunctions
 							if (!e.Player.HasPermission("us.remove.prefix"))
 							{
 								e.Player.SendErrorMessage("You do not have access to this command.");
-								return;
 							}
 							else
 							{
 								target.ChatData.Prefix = null;
-								_plugin.Database.Update(target, UpdateType.Prefix);
+								_plugin.Database.Update(target, DatabaseUpdate.Prefix);
 								e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
 							}
 						}
@@ -501,12 +487,11 @@ namespace UserSpecificFunctions
 							if (!e.Player.HasPermission("us.remove.suffix"))
 							{
 								e.Player.SendErrorMessage("You do not have access to this command.");
-								return;
 							}
 							else
 							{
 								target.ChatData.Suffix = null;
-								_plugin.Database.Update(target, UpdateType.Suffix);
+								_plugin.Database.Update(target, DatabaseUpdate.Suffix);
 								e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
 							}
 						}
@@ -522,7 +507,7 @@ namespace UserSpecificFunctions
 							else
 							{
 								target.ChatData.Color = null;
-								_plugin.Database.Update(target, UpdateType.Color);
+								_plugin.Database.Update(target, DatabaseUpdate.Color);
 								e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
 							}
 						}
@@ -532,12 +517,11 @@ namespace UserSpecificFunctions
 							if (!e.Player.HasPermission("us.resetall"))
 							{
 								e.Player.SendErrorMessage("You do not have access to this command.");
-								return;
 							}
 							else
 							{
 								target.ChatData = new ChatData();
-								_plugin.Database.Update(target, UpdateType.Prefix | UpdateType.Suffix | UpdateType.Color);
+								_plugin.Database.Update(target, DatabaseUpdate.Prefix | DatabaseUpdate.Suffix | DatabaseUpdate.Color);
 								e.Player.SendSuccessMessage($"Modified {users[0].Name}'s chat data successfully.");
 							}
 						}
@@ -554,25 +538,22 @@ namespace UserSpecificFunctions
 				return;
 			}
 
-			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			var users = TShock.Users.GetUsersByName(e.Parameters[1]);
 			if (users.Count == 0)
 			{
 				e.Player.SendErrorMessage("Invalid player!");
-				return;
 			}
 			else if (users.Count > 1)
 			{
 				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(p => p.Name));
-				return;
 			}
 			else
 			{
-				PlayerInfo target = _plugin.Database.Get(users[0]);
+				var target = _plugin.Database.Get(users[0]);
 
 				if (target == null)
 				{
 					e.Player.SendErrorMessage("This user has no player specific information to read.");
-					return;
 				}
 				else
 				{
@@ -592,25 +573,23 @@ namespace UserSpecificFunctions
 				return;
 			}
 
-			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			var users = TShock.Users.GetUsersByName(e.Parameters[1]);
 			if (users.Count == 0)
 			{
 				e.Player.SendErrorMessage($"Could not find a user under the name '{e.Parameters[1]}'");
-				return;
 			}
 			else if (users.Count > 1)
 			{
 				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(u => u.Name));
-				return;
 			}
 			else
 			{
 				e.Parameters.RemoveRange(0, 2);
-				PlayerInfo target = _plugin.Database.Get(users[0]);
+				var target = _plugin.Database.Get(users[0]);
 
 				if (target == null)
 				{
-					target = new PlayerInfo()
+					target = new PlayerInfo
 					{
 						UserId = users[0].ID,
 						ChatData = new ChatData(),
@@ -622,7 +601,7 @@ namespace UserSpecificFunctions
 				else
 				{
 					e.Parameters.ForEach(p => target.Permissions.AddPermission(p));
-					_plugin.Database.Update(target, UpdateType.Permissions);
+					_plugin.Database.Update(target, DatabaseUpdate.Permissions);
 				}
 
 				e.Player.SendSuccessMessage($"Modified {users[0].Name}'s permissions successfully.");
@@ -637,34 +616,30 @@ namespace UserSpecificFunctions
 				return;
 			}
 
-			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			var users = TShock.Users.GetUsersByName(e.Parameters[1]);
 			if (users.Count == 0)
 			{
 				e.Player.SendErrorMessage($"Could not find a user under the name '{e.Parameters[1]}'");
-				return;
 			}
 			else if (users.Count > 1)
 			{
 				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(u => u.Name));
-				return;
 			}
 			else
 			{
 				e.Parameters.RemoveRange(0, 2);
-				PlayerInfo target = _plugin.Database.Get(users[0]);
+				var target = _plugin.Database.Get(users[0]);
 
 				if (target == null)
 				{
 					e.Player.SendErrorMessage("This user has no custom permissions.");
-					return;
 				}
 				else
 				{
 					e.Parameters.ForEach(p => target.Permissions.RemovePermission(p));
-					_plugin.Database.Update(target, UpdateType.Permissions);
+					_plugin.Database.Update(target, DatabaseUpdate.Permissions);
+					e.Player.SendSuccessMessage($"Modified {users[0].Name}'s permissions successfully.");
 				}
-
-				e.Player.SendSuccessMessage($"Modified {users[0].Name}'s permissions successfully.");
 			}
 		}
 
@@ -676,20 +651,18 @@ namespace UserSpecificFunctions
 				return;
 			}
 
-			List<User> users = TShock.Users.GetUsersByName(e.Parameters[1]);
+			var users = TShock.Users.GetUsersByName(e.Parameters[1]);
 			if (users.Count == 0)
 			{
 				e.Player.SendErrorMessage("Invalid player!");
-				return;
 			}
 			else if (users.Count > 1)
 			{
 				TShock.Utils.SendMultipleMatchError(e.Player, users.Select(p => p.Name));
-				return;
 			}
 			else
 			{
-				PlayerInfo target = _plugin.Database.Get(users[0]);
+				var target = _plugin.Database.Get(users[0]);
 
 				if (target == null || target.Permissions.Count == 0)
 				{

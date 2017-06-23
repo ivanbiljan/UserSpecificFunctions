@@ -5,11 +5,11 @@ using UserSpecificFunctions.Permissions;
 namespace UserSpecificFunctions.Models
 {
 	/// <summary>
-	/// Extends the <see cref="TSPlayer"/> class.
+	/// Extends the <see cref="TShockAPI.TSPlayer"/> class.
 	/// </summary>
 	public sealed class PlayerInfo
 	{
-		public const string Data_Key = "Usf_Data";
+		public const string DataKey = "Usf_Data";
 
 		/// <summary>
 		/// Gets the ID of the user that this instance belongs to.
@@ -40,7 +40,7 @@ namespace UserSpecificFunctions.Models
 		/// Initializes a new instance of the <see cref="PlayerInfo"/> class.
 		/// </summary>
 		/// <param name="userId">The user's ID.</param>
-		/// <param name="chatInfo">The user's chat information.</param>
+		/// <param name="chatData">The user's chat information.</param>
 		/// <param name="permissions">A collection of the user's permissions.</param>
 		public PlayerInfo(int userId, ChatData chatData, PermissionCollection permissions)
 		{
@@ -49,12 +49,17 @@ namespace UserSpecificFunctions.Models
 			Permissions = permissions;
 		}
 
+		/// <summary>
+		/// Parses a <see cref="PlayerInfo"/> object from the given QueryResult.
+		/// </summary>
+		/// <param name="result">The result.</param>
+		/// <returns>A <see cref="PlayerInfo"/> object.</returns>
 		public PlayerInfo ParseFromQuery(QueryResult result)
 		{
-			return new PlayerInfo()
+			return new PlayerInfo
 			{
 				UserId = result.Get<int>("UserID"),
-				ChatData = new ChatData()
+				ChatData = new ChatData
 				{
 					Prefix = result.Get<string>("Prefix"),
 					Suffix = result.Get<string>("Suffix"),

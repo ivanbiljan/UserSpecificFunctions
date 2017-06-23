@@ -20,27 +20,24 @@ namespace UserSpecificFunctions.Extensions
 				throw new ArgumentNullException(nameof(color));
 			}
 
-			string[] colorPayload = color.Split(',');
+			var colorPayload = color.Split(',');
 			if (colorPayload.Length != 3)
 			{
 				throw new ArgumentException("The color provided was not in the correct format.", nameof(color));
 			}
-			else if (!byte.TryParse(colorPayload[0], out byte r))
+			if (!byte.TryParse(colorPayload[0], out byte r))
 			{
 				throw new ArgumentException("The color provided was not in the correct format.", nameof(color));
 			}
-			else if (!byte.TryParse(colorPayload[1], out byte g))
+			if (!byte.TryParse(colorPayload[1], out byte g))
 			{
 				throw new ArgumentException("The color provided was not in the correct format.", nameof(color));
 			}
-			else if (!byte.TryParse(colorPayload[2], out byte b))
+			if (!byte.TryParse(colorPayload[2], out byte b))
 			{
 				throw new ArgumentException("The color provided was not in the correct format.", nameof(color));
 			}
-			else
-			{
-				return new Color(r, g, b);
-			}
+			return new Color(r, g, b);
 		}
 	}
 }

@@ -11,14 +11,13 @@ using TShockAPI.Hooks;
 using UserSpecificFunctions.Models;
 using UserSpecificFunctions.Database;
 using UserSpecificFunctions.Extensions;
-using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 
 namespace UserSpecificFunctions
 {
 	[ApiVersion(2, 1)]
-    public sealed class UserSpecificFunctionsPlugin : TerrariaPlugin
-    {
+	public sealed class UserSpecificFunctionsPlugin : TerrariaPlugin
+	{
 		private static readonly string ConfigPath = Path.Combine(TShock.SavePath, "userspecificfunctions.json");
 
 		private CommandHandler _commandHandler;
@@ -39,14 +38,14 @@ namespace UserSpecificFunctions
 		public override string Author => "Professor X";
 
 		/// <summary>
-		/// Gets the name.
-		/// </summary>
-		public override string Name => "User Specific Functions";
-
-		/// <summary>
 		/// Gets the description.
 		/// </summary>
 		public override string Description => "";
+
+		/// <summary>
+		/// Gets the name.
+		/// </summary>
+		public override string Name => "User Specific Functions";
 
 		/// <summary>
 		/// Gets the version.
@@ -100,78 +99,81 @@ namespace UserSpecificFunctions
 			_commandHandler.Register();
 		}
 
-		private void OnChat(ServerChatEventArgs e)
+		private static void OnChat(ServerChatEventArgs e)
 		{
 			if (e.Handled)
 			{
 				return;
 			}
 
-			TSPlayer player = TShock.Players[e.Who];
+			var player = TShock.Players[e.Who];
 			if (player == null)
 			{
 				return;
 			}
 
-			PlayerInfo playerData = player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
-			if (!e.Text.StartsWith(TShock.Config.CommandSpecifier) && !e.Text.StartsWith(TShock.Config.CommandSilentSpecifier))
+			if (e.Text.StartsWith(TShock.Config.CommandSpecifier) || e.Text.StartsWith(TShock.Config.CommandSilentSpecifier))
 			{
-				string prefix = playerData?.ChatData.Prefix ?? player.Group.Prefix;
-				string suffix = playerData?.ChatData.Suffix ?? player.Group.Suffix;
-				Color chatColor = playerData?.ChatData.Color?.ParseColor() ?? player.Group.ChatColor.ParseColor();
+				return;
+			}
 
-				if (!TShock.Config.EnableChatAboveHeads)
-				{
-					string message = string.Format(TShock.Config.ChatFormat, player.Group.Name, prefix, player.Name, suffix, e.Text);
-					TSPlayer.All.SendMessage(message, chatColor);
-					TSPlayer.Server.SendMessage(message, chatColor);
-					TShock.Log.Info($"Broadcast: {message}");
+			var playerData = player.GetData<PlayerInfo>(PlayerInfo.DataKey);
+			var prefix = playerData?.ChatData.Prefix ?? player.Group.Prefix;
+			var suffix = playerData?.ChatData.Suffix ?? player.Group.Suffix;
+			var chatColor = playerData?.ChatData.Color?.ParseColor() ?? player.Group.ChatColor.ParseColor();
 
-					e.Handled = true;
-				}
-				else
-				{
-					string playerName = player.TPlayer.name;
-					player.TPlayer.name = string.Format(TShock.Config.ChatAboveHeadsFormat, player.Group.Name, prefix, player.Name, suffix);
-					NetMessage.SendData((int)PacketTypes.PlayerInfo, -1, -1, NetworkText.FromLiteral(player.TPlayer.name), e.Who);
+			if (!TShock.Config.EnableChatAboveHeads)
+			{
+				var message = string.Format(TShock.Config.ChatFormat, player.Group.Name, prefix, player.Name, suffix, e.Text);
+				TSPlayer.All.SendMessage(message, chatColor);
+				TSPlayer.Server.SendMessage(message, chatColor);
+				TShock.Log.Info($"Broadcast: {message}");
 
-					player.TPlayer.name = playerName;
+				e.Handled = true;
+			}
+			else
+			{
+				var playerName = player.TPlayer.name;
+				player.TPlayer.name = string.Format(TShock.Config.ChatAboveHeadsFormat, player.Group.Name, prefix, player.Name,
+					suffix);
+				NetMessage.SendData((int) PacketTypes.PlayerInfo, -1, -1, NetworkText.FromLiteral(player.TPlayer.name), e.Who);
 
-					NetPacket packet = NetTextModule.SerializeServerMessage(NetworkText.FromLiteral(e.Text), chatColor, (byte)e.Who);
-					NetManager.Instance.Broadcast(packet, e.Who);
+				player.TPlayer.name = playerName;
 
-					NetMessage.SendData((int)PacketTypes.PlayerInfo, -1, -1, NetworkText.FromLiteral(playerName), e.Who);
+				var packet = NetTextModule.SerializeServerMessage(NetworkText.FromLiteral(e.Text), chatColor, (byte) e.Who);
+				NetManager.Instance.Broadcast(packet, e.Who);
 
-					string msg = string.Format("<{0}> {1}", string.Format(TShock.Config.ChatAboveHeadsFormat, player.Group.Name,
-						prefix, player.Name, suffix), e.Text);
+				NetMessage.SendData((int) PacketTypes.PlayerInfo, -1, -1, NetworkText.FromLiteral(playerName), e.Who);
 
-					player.SendMessage(msg, chatColor);
-					TSPlayer.Server.SendMessage(msg, chatColor);
-					TShock.Log.Info($"Broadcast: {msg}");
+				var msg = string.Format("<{0}> {1}", string.Format(TShock.Config.ChatAboveHeadsFormat, player.Group.Name,
+					prefix, player.Name, suffix), e.Text);
 
-					e.Handled = true;
-				}
+				player.SendMessage(msg, chatColor);
+				TSPlayer.Server.SendMessage(msg, chatColor);
+				TShock.Log.Info($"Broadcast: {msg}");
+
+				e.Handled = true;
 			}
 		}
 
 		private void OnPostLogin(PlayerPostLoginEventArgs e)
 		{
-			PlayerInfo playerInfo = Database.Get(e.Player.User);
+			var playerInfo = Database.Get(e.Player.User);
 			if (playerInfo != null)
 			{
-				e.Player.SetData(PlayerInfo.Data_Key, playerInfo);
+				e.Player.SetData(PlayerInfo.DataKey, playerInfo);
 			}
 		}
 
-		private void OnPermission(PlayerPermissionEventArgs e)
+		private static void OnPermission(PlayerPermissionEventArgs e)
 		{
-			if (e.Player == null || !e.Player.IsLoggedIn || !e.Player.ContainsData(PlayerInfo.Data_Key))
+			if (e.Player == null || !e.Player.IsLoggedIn || !e.Player.ContainsData(PlayerInfo.DataKey))
 			{
 				return;
 			}
 
-			PlayerInfo info = e.Player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
-			e.Handled = info.Permissions.ContainsPermission(e.Permission);
+			var playerInfo = e.Player.GetData<PlayerInfo>(PlayerInfo.DataKey);
+			e.Handled = playerInfo.Permissions.ContainsPermission(e.Permission);
 		}
 	}
 }
