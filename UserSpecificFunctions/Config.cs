@@ -10,7 +10,7 @@ namespace UserSpecificFunctions
 		/// <summary>
 		/// Gets a list of words users are not allowed to use in their chat tags.
 		/// </summary>
-		public List<string> ProhibitedWords { get; } = new List<string>() { "Shit", "Fuck" };
+		public List<string> ProhibitedWords { get; } = new List<string> { "Shit", "Fuck" };
 
 		/// <summary>
 		/// Gets the maximum prefix length.

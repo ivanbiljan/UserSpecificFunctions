@@ -11,7 +11,7 @@ namespace UserSpecificFunctions
 	/// <summary>
 	/// Represents the command handler.
 	/// </summary>
-	public sealed class CommandHandler
+	internal sealed class CommandHandler
 	{
 		private readonly UserSpecificFunctionsPlugin _plugin;
 
@@ -259,12 +259,13 @@ namespace UserSpecificFunctions
 
 				if (target == null)
 				{
-					target = new PlayerInfo
-					{
-						UserId = users[0].ID,
-						ChatData = new ChatData(prefix, null, null),
-						Permissions = new PermissionCollection()
-					};
+					//target = new PlayerInfo
+					//{
+					//	UserId = users[0].ID,
+					//	ChatData = new ChatData(prefix, null, null),
+					//	Permissions = new PermissionCollection()
+					//};
+					target = new PlayerInfo(users[0].ID, new ChatData(prefix, null, null), new PermissionCollection());
 
 					_plugin.Database.Add(target);
 				}
@@ -338,12 +339,13 @@ namespace UserSpecificFunctions
 
 				if (target == null)
 				{
-					target = new PlayerInfo
-					{
-						UserId = users[0].ID,
-						ChatData = new ChatData(null, suffix, null),
-						Permissions = new PermissionCollection()
-					};
+					//target = new PlayerInfo
+					//{
+					//	UserId = users[0].ID,
+					//	ChatData = new ChatData(null, suffix, null),
+					//	Permissions = new PermissionCollection()
+					//};
+					target = new PlayerInfo(users[0].ID, new ChatData(null, suffix, null), new PermissionCollection());
 
 					_plugin.Database.Add(target);
 				}
@@ -405,12 +407,13 @@ namespace UserSpecificFunctions
 
 					if (target == null)
 					{
-						target = new PlayerInfo
-						{
-							UserId = users[0].ID,
-							ChatData = new ChatData(null, null, e.Parameters[2]),
-							Permissions = new PermissionCollection()
-						};
+						//target = new PlayerInfo
+						//{
+						//	UserId = users[0].ID,
+						//	ChatData = new ChatData(null, null, e.Parameters[2]),
+						//	Permissions = new PermissionCollection()
+						//};
+						target = new PlayerInfo(users[0].ID, new ChatData(null, null, e.Parameters[2]), new PermissionCollection());
 
 						_plugin.Database.Add(target);
 					}
@@ -502,7 +505,6 @@ namespace UserSpecificFunctions
 							if (!e.Player.HasPermission("us.remove.color"))
 							{
 								e.Player.SendErrorMessage("You do not have access to this command.");
-								return;
 							}
 							else
 							{
@@ -589,12 +591,13 @@ namespace UserSpecificFunctions
 
 				if (target == null)
 				{
-					target = new PlayerInfo
-					{
-						UserId = users[0].ID,
-						ChatData = new ChatData(),
-						Permissions = new PermissionCollection(e.Parameters)
-					};
+					//target = new PlayerInfo
+					//{
+					//	UserId = users[0].ID,
+					//	ChatData = new ChatData(),
+					//	Permissions = new PermissionCollection(e.Parameters)
+					//};
+					target = new PlayerInfo(users[0].ID, new ChatData(), new PermissionCollection(e.Parameters));
 
 					_plugin.Database.Add(target);
 				}

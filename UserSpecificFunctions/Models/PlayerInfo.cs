@@ -14,7 +14,7 @@ namespace UserSpecificFunctions.Models
 		/// <summary>
 		/// Gets the ID of the user that this instance belongs to.
 		/// </summary>
-		public int UserId { get; set; }
+		public int UserId { get; }
 
 		/// <summary>
 		/// Gets the <see cref="UserSpecificFunctions.Models.ChatData"/> instance associated with this <see cref="PlayerInfo"/> instance.
@@ -56,17 +56,21 @@ namespace UserSpecificFunctions.Models
 		/// <returns>A <see cref="PlayerInfo"/> object.</returns>
 		public PlayerInfo ParseFromQuery(QueryResult result)
 		{
-			return new PlayerInfo
-			{
-				UserId = result.Get<int>("UserID"),
-				ChatData = new ChatData
-				{
-					Prefix = result.Get<string>("Prefix"),
-					Suffix = result.Get<string>("Suffix"),
-					Color = result.Get<string>("Color")
-				},
-				Permissions = new PermissionCollection(Regex.Replace(result.Get<string>("Permissions"), @"\s+", "").Split(','))
-			};
+			//return new PlayerInfo
+			//{
+			//	UserId = result.Get<int>("UserID"),
+			//	ChatData = new ChatData
+			//	{
+			//		Prefix = result.Get<string>("Prefix"),
+			//		Suffix = result.Get<string>("Suffix"),
+			//		Color = result.Get<string>("Color")
+			//	},
+			//	Permissions = new PermissionCollection(Regex.Replace(result.Get<string>("Permissions"), @"\s+", "").Split(','))
+			//};
+
+			return new PlayerInfo(result.Get<int>("UserID"),
+				new ChatData(result.Get<string>("Prefix"), result.Get<string>("Suffix"), result.Get<string>("Color")),
+				new PermissionCollection(Regex.Replace(result.Get<string>("Permissions"), @"\s+", "").Split(',')));
 		}
 	}
 }

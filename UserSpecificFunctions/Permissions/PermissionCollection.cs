@@ -15,7 +15,7 @@ namespace UserSpecificFunctions.Permissions
 		/// <summary>
 		/// Gets the number of elements in the collection.
 		/// </summary>
-		public int Count => ((ICollection)_permissions).Count;
+		public int Count => _permissions.Count;
 
 		/// <summary>
 		/// Indicates whether access to the collection is thread safe.
@@ -58,7 +58,7 @@ namespace UserSpecificFunctions.Permissions
 		public PermissionCollection(IEnumerable<string> permissions)
 		{
 			_permissions = new List<Permission>();
-			foreach (string permission in permissions)
+			foreach (var permission in permissions)
 			{
 				AddPermission(permission);
 			}
