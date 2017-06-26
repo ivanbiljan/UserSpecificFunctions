@@ -6,7 +6,6 @@ using TShockAPI;
 using TShockAPI.DB;
 using Mono.Data.Sqlite;
 using MySql.Data.MySqlClient;
-using UserSpecificFunctions.Models;
 
 namespace UserSpecificFunctions.Database
 {

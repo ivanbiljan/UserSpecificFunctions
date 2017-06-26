@@ -67,12 +67,12 @@
     <Compile Include="CommandHandler.cs" />
     <Compile Include="Database\DatabaseManager.cs" />
     <Compile Include="Database\DatabaseUpdate.cs" />
-    <Compile Include="Models\ChatData.cs" />
+    <Compile Include="ChatData.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Extensions\String.Extensions.cs" />
     <Compile Include="Permissions\Permission.cs" />
     <Compile Include="Permissions\PermissionCollection.cs" />
-    <Compile Include="Models\PlayerInfo.cs" />
+    <Compile Include="PlayerInfo.cs" />
     <Compile Include="UserSpecificFunctionsPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

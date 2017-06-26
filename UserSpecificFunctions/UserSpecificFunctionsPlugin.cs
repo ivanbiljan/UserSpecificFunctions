@@ -8,7 +8,6 @@ using Terraria.GameContent.NetModules;
 using TerrariaApi.Server;
 using TShockAPI;
 using TShockAPI.Hooks;
-using UserSpecificFunctions.Models;
 using UserSpecificFunctions.Database;
 using UserSpecificFunctions.Extensions;
 using Newtonsoft.Json;

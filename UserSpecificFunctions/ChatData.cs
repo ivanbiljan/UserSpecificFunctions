@@ -1,4 +1,4 @@
-﻿namespace UserSpecificFunctions.Models
+﻿namespace UserSpecificFunctions
 {
 	/// <summary>
 	/// Contains information on a user's chat data.

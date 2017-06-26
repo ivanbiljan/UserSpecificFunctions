@@ -2,7 +2,7 @@
 using TShockAPI.DB;
 using UserSpecificFunctions.Permissions;
 
-namespace UserSpecificFunctions.Models
+namespace UserSpecificFunctions
 {
 	/// <summary>
 	/// Extends the <see cref="TShockAPI.TSPlayer"/> class.

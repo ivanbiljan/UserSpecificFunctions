@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using TShockAPI;
-using UserSpecificFunctions.Models;
 using UserSpecificFunctions.Permissions;
 using UserSpecificFunctions.Database;
 using Microsoft.Xna.Framework;
