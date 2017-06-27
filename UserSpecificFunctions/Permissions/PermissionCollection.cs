@@ -70,7 +70,7 @@ namespace UserSpecificFunctions.Permissions
 		/// <returns>A string representation of this collection.</returns>
 		public override string ToString()
 		{
-			return string.Join(", ", _permissions.Select(p => p.Negated ? $"!{p.Name}" : p.Name));
+			return string.Join(", ", _permissions.Select(p => p.ToString()));
 		}
 
 		/// <summary>

@@ -1,12 +1,14 @@
-﻿namespace UserSpecificFunctions.Permissions
+﻿using System;
+
+namespace UserSpecificFunctions.Permissions
 {
 	/// <summary>
 	/// Represents a permission.
 	/// </summary>
-	public sealed class Permission
+	public class Permission : IEquatable<Permission>
 	{
 		/// <summary>
-		/// Gets the permissions's name.
+		/// Gets the permission's name.
 		/// </summary>
 		public string Name { get; }
 
@@ -16,9 +18,9 @@
 		public bool Negated { get; }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="Permission"/> class.
+		/// Initializes a new instance of the <see cref="Permission"/> class with the specified name.
 		/// </summary>
-		/// <param name="name">The permission's name.</param>
+		/// <param name="name"></param>
 		public Permission(string name)
 		{
 			if (name.StartsWith("!"))
@@ -30,18 +32,16 @@
 			Name = name;
 		}
 
-		/// <summary>
-		/// Checks to see whether the <see cref="Permission"/> is equal to an <paramref name="obj"/>.
-		/// </summary>
-		/// <param name="obj">The object.</param>
-		/// <returns>True or false.</returns>
-		public override bool Equals(object obj) => obj is Permission permission && Equals(permission);
-
 		/// <inheritdoc />
-		private bool Equals(Permission other)
+		public bool Equals(Permission other)
 		{
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
 			return string.Equals(Name, other.Name) && Negated == other.Negated;
 		}
+
+		/// <inheritdoc />
+		public override bool Equals(object obj) => obj is Permission permission && Equals(permission);
 
 		/// <inheritdoc />
 		public override int GetHashCode()
@@ -52,10 +52,16 @@
 			}
 		}
 
-		public bool Equals(string permissionName)
-		{
-			var permission = new Permission(permissionName);
-			return Equals(permission);
-		}
+		/// <inheritdoc />
+		public static bool operator ==(Permission left, Permission right) => left.Equals(right);
+
+		/// <inheritdoc />
+		public static bool operator !=(Permission left, Permission right) => !left.Equals(right);
+
+		/// <summary>
+		/// Returns the string representation of this permission.
+		/// </summary>
+		/// <returns>The string representation of this permission.</returns>
+		public override string ToString() => Negated ? $"!{Name}" : Name;
 	}
 }
