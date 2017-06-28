@@ -5,7 +5,7 @@ namespace UserSpecificFunctions.Permissions
 	/// <summary>
 	/// Represents a permission.
 	/// </summary>
-	public class Permission : IEquatable<Permission>
+	public sealed class Permission : IEquatable<Permission>
 	{
 		/// <summary>
 		/// Gets the permission's name.
@@ -32,7 +32,11 @@ namespace UserSpecificFunctions.Permissions
 			Name = name;
 		}
 
-		/// <inheritdoc />
+		/// <summary>
+		/// Compares the permission to the given <see cref="Permission"/> object in order to check if they are equal.
+		/// </summary>
+		/// <param name="other">The <see cref="Permission"/> object.</param>
+		/// <returns><c>true</c> if the permissions are equal.</returns>
 		public bool Equals(Permission other)
 		{
 			if (ReferenceEquals(null, other)) return false;
@@ -40,10 +44,17 @@ namespace UserSpecificFunctions.Permissions
 			return string.Equals(Name, other.Name) && Negated == other.Negated;
 		}
 
-		/// <inheritdoc />
+		/// <summary>
+		/// Compares the permission to the given object in order to check if they are equal.
+		/// </summary>
+		/// <param name="obj">The object.</param>
+		/// <returns><c>true</c> if the permission and the object are equal.</returns>
 		public override bool Equals(object obj) => obj is Permission permission && Equals(permission);
 
-		/// <inheritdoc />
+		/// <summary>
+		/// Returns the hash code of the permission.
+		/// </summary>
+		/// <returns>The hash.</returns>
 		public override int GetHashCode()
 		{
 			unchecked
@@ -52,10 +63,20 @@ namespace UserSpecificFunctions.Permissions
 			}
 		}
 
-		/// <inheritdoc />
+		/// <summary>
+		/// Tests for equality of two permission objects.
+		/// </summary>
+		/// <param name="left">The first permission.</param>
+		/// <param name="right">The second permission.</param>
+		/// <returns><c>true</c> if the permissions are equal.</returns>
 		public static bool operator ==(Permission left, Permission right) => left.Equals(right);
 
-		/// <inheritdoc />
+		/// <summary>
+		/// Tests for inequality of two permission objects.
+		/// </summary>
+		/// <param name="left">The first permission.</param>
+		/// <param name="right">The second permission.</param>
+		/// <returns><c>true</c> if the permissions are not equal.</returns>
 		public static bool operator !=(Permission left, Permission right) => !left.Equals(right);
 
 		/// <summary>

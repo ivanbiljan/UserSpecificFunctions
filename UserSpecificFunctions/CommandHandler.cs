@@ -44,7 +44,7 @@ namespace UserSpecificFunctions
 			Commands.ChatCommands.RemoveAll(c => c.CommandDelegate == PermissionCommandHandler);
 		}
 
-		private void Help(CommandArgs e)
+		private static void Help(CommandArgs e)
 		{
 			if (e.Parameters.Count > 1)
 			{
@@ -163,7 +163,7 @@ namespace UserSpecificFunctions
 			}
 		}
 
-		private void SendInvalidSyntax(CommandArgs e)
+		private static void SendInvalidSyntax(CommandArgs e)
 		{
 			var help = new Dictionary<string, string>()
 			{
@@ -264,7 +264,7 @@ namespace UserSpecificFunctions
 					//	ChatData = new ChatData(prefix, null, null),
 					//	Permissions = new PermissionCollection()
 					//};
-					target = new PlayerInfo(users[0].ID, new ChatData(prefix, null, null), new PermissionCollection());
+					target = new PlayerInfo(users[0].ID, new ChatData(prefix), new PermissionCollection());
 
 					_plugin.Database.Add(target);
 				}
@@ -344,7 +344,7 @@ namespace UserSpecificFunctions
 					//	ChatData = new ChatData(null, suffix, null),
 					//	Permissions = new PermissionCollection()
 					//};
-					target = new PlayerInfo(users[0].ID, new ChatData(null, suffix, null), new PermissionCollection());
+					target = new PlayerInfo(users[0].ID, new ChatData(suffix: suffix), new PermissionCollection());
 
 					_plugin.Database.Add(target);
 				}
@@ -412,7 +412,7 @@ namespace UserSpecificFunctions
 						//	ChatData = new ChatData(null, null, e.Parameters[2]),
 						//	Permissions = new PermissionCollection()
 						//};
-						target = new PlayerInfo(users[0].ID, new ChatData(null, null, e.Parameters[2]), new PermissionCollection());
+						target = new PlayerInfo(users[0].ID, new ChatData(color: e.Parameters[2]), new PermissionCollection());
 
 						_plugin.Database.Add(target);
 					}
@@ -558,7 +558,7 @@ namespace UserSpecificFunctions
 				}
 				else
 				{
-					e.Player.SendMessage($"Username: {users[0].Name}", Color.LawnGreen);
+					e.Player.SendInfoMessage($"Username: {users[0].Name}");
 					e.Player.SendMessage($"  * Prefix: {target.ChatData.Prefix ?? "None"}", Color.LawnGreen);
 					e.Player.SendMessage($"  * Suffix: {target.ChatData.Suffix ?? "None"}", Color.LawnGreen);
 					e.Player.SendMessage($"  * Chat color: {target.ChatData.Color ?? "None"}", Color.LawnGreen);

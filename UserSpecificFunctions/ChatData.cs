@@ -31,12 +31,12 @@
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ChatData"/> class.
+		/// Initializes a new instance of the <see cref="ChatData"/> class with the specified prefix, suffix and chat color.
 		/// </summary>
 		/// <param name="prefix">The prefix.</param>
 		/// <param name="suffix">The suffix.</param>
 		/// <param name="color">The color.</param>
-		public ChatData(string prefix, string suffix, string color)
+		public ChatData(string prefix = null, string suffix = null, string color = null)
 		{
 			Prefix = prefix;
 			Suffix = suffix;

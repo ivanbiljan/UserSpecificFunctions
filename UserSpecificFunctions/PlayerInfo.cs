@@ -17,12 +17,12 @@ namespace UserSpecificFunctions
 		public int UserId { get; }
 
 		/// <summary>
-		/// Gets the <see cref="UserSpecificFunctions.Models.ChatData"/> instance associated with this <see cref="PlayerInfo"/> instance.
+		/// Gets or sets the <see cref="UserSpecificFunctions.ChatData"/> instance associated with this <see cref="PlayerInfo"/> instance.
 		/// </summary>
 		public ChatData ChatData { get; set; }
 
 		/// <summary>
-		/// Gets a list of custom permissions the user has.
+		/// Gets or sets the list of custom permissions the user has.
 		/// </summary>
 		public PermissionCollection Permissions { get; set; }
 
