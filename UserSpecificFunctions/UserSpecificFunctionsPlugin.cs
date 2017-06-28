@@ -111,6 +111,11 @@ namespace UserSpecificFunctions
 				return;
 			}
 
+			if (!player.HasPermission(TShockAPI.Permissions.canchat) || player.mute)
+			{
+				return;
+			}
+
 			if (e.Text.StartsWith(TShock.Config.CommandSpecifier) || e.Text.StartsWith(TShock.Config.CommandSilentSpecifier))
 			{
 				return;
