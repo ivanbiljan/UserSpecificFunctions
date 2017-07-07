@@ -22,6 +22,11 @@ namespace UserSpecificFunctions
 		private CommandHandler _commandHandler;
 
 		/// <summary>
+		/// Gets the UserSpecificFunctions instance.
+		/// </summary>
+		public static UserSpecificFunctionsPlugin Instance { get; private set; }
+
+		/// <summary>
 		/// Gets the <see cref="Config"/> instance.
 		/// </summary>
 		public Config Configuration { get; private set; } = new Config();
@@ -96,6 +101,7 @@ namespace UserSpecificFunctions
 
 			_commandHandler = new CommandHandler(this);
 			_commandHandler.Register();
+			Instance = this;
 		}
 
 		private static void OnChat(ServerChatEventArgs e)
