@@ -228,44 +228,24 @@ namespace UserSpecificFunctions
 			else
 			{
 				e.Parameters.RemoveRange(0, 2);
-				string prefix = string.Join(" ", e.Parameters);
-				//if (prefix.Length > _config.MaximumPrefixLength)
-				//{
-				//	e.Player.SendErrorMessage($"Your prefix cannot be longer than {_config.MaximumPrefixLength} characters.");
-				//	return;
-				//}
-
-				var matches = _plugin.Configuration.ProhibitedWords.Where(p => prefix.ToLowerInvariant().Contains(p.ToLowerInvariant()));
-				if (matches.Any())
+				var prefix = string.Join(" ", e.Parameters);
+				if (prefix.Length > _plugin.Configuration.MaximumPrefixLength)
 				{
-					e.Player.SendErrorMessage($"Your chat prefix cannot contain the following word(s): {string.Join(", ", matches)}");
+					e.Player.SendErrorMessage($"Your prefix cannot be longer than {_plugin.Configuration.MaximumPrefixLength} characters.");
 					return;
 				}
 
-				//PlayerInfo target;
-
-				//TSPlayer player = TShock.Players.FirstOrDefault(p => p?.User == users[0]);
-				//if (player != null && player.GetData<PlayerInfo>(PlayerInfo.Data_Key) != null)
-				//{
-				//	target = player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
-				//}
-				//else
-				//{
-				//	target = _database.Get(users[0]);
-				//}
+				if (_plugin.Configuration.ProhibitedWords.Any(prefix.Contains))
+				{
+					e.Player.SendErrorMessage(
+						$"Your chat prefix cannot contain the following word(s): {string.Join(", ", from w in _plugin.Configuration.ProhibitedWords where prefix.ToLowerInvariant().Contains(w.ToLowerInvariant()) select w)}");
+					return;
+				}
 
 				var target = _plugin.Database.Get(users[0]);
-
 				if (target == null)
 				{
-					//target = new PlayerInfo
-					//{
-					//	UserId = users[0].ID,
-					//	ChatData = new ChatData(prefix, null, null),
-					//	Permissions = new PermissionCollection()
-					//};
 					target = new PlayerInfo(users[0].ID, new ChatData(prefix), new PermissionCollection());
-
 					_plugin.Database.Add(target);
 				}
 				else
@@ -309,43 +289,23 @@ namespace UserSpecificFunctions
 			{
 				e.Parameters.RemoveRange(0, 2);
 				var suffix = string.Join(" ", e.Parameters);
-				//if (suffix.Length > _config.MaximumSuffixLength)
-				//{
-				//	e.Player.SendErrorMessage($"Your suffix cannot be longer than {_config.MaximumSuffixLength} characters.");
-				//	return;
-				//}
-
-				var matches = _plugin.Configuration.ProhibitedWords.Where(p => suffix.ToLowerInvariant().Contains(p.ToLowerInvariant()));
-				if (matches.Any())
+				if (suffix.Length > _plugin.Configuration.MaximumSuffixLength)
 				{
-					e.Player.SendErrorMessage($"Your chat suffix cannot contain the following word(s): {string.Join(", ", matches)}");
+					e.Player.SendErrorMessage($"Your suffix cannot be longer than {_plugin.Configuration.MaximumSuffixLength} characters.");
 					return;
 				}
 
-				//PlayerInfo target;
-
-				//TSPlayer player = TShock.Players.FirstOrDefault(p => p?.User == users[0]);
-				//if (player != null && player.GetData<PlayerInfo>(PlayerInfo.Data_Key) != null)
-				//{
-				//	target = player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
-				//}
-				//else
-				//{
-				//	target = _database.Get(users[0]);
-				//}
+				if (_plugin.Configuration.ProhibitedWords.Any(suffix.Contains))
+				{
+					e.Player.SendErrorMessage(
+						$"Your chat suffix cannot contain the following word(s): {string.Join(", ", from w in _plugin.Configuration.ProhibitedWords where suffix.ToLowerInvariant().Contains(w.ToLowerInvariant()) select w)}");
+					return;
+				}
 
 				var target = _plugin.Database.Get(users[0]);
-
 				if (target == null)
 				{
-					//target = new PlayerInfo
-					//{
-					//	UserId = users[0].ID,
-					//	ChatData = new ChatData(null, suffix, null),
-					//	Permissions = new PermissionCollection()
-					//};
 					target = new PlayerInfo(users[0].ID, new ChatData(suffix: suffix), new PermissionCollection());
-
 					_plugin.Database.Add(target);
 				}
 				else
@@ -387,33 +347,13 @@ namespace UserSpecificFunctions
 			}
 			else
 			{
-				//PlayerInfo target;
-
 				var color = e.Parameters[2].Split(',');
 				if (color.Length == 3 && byte.TryParse(color[0], out byte r) && byte.TryParse(color[1], out byte g) && byte.TryParse(color[2], out byte b))
 				{
-					//TSPlayer player = TShock.Players.FirstOrDefault(p => p?.User == users[0]);
-					//if (player != null && player.GetData<PlayerInfo>(PlayerInfo.Data_Key) != null)
-					//{
-					//	target = player.GetData<PlayerInfo>(PlayerInfo.Data_Key);
-					//}
-					//else
-					//{
-					//	target = _database.Get(users[0]);
-					//}
-
 					var target = _plugin.Database.Get(users[0]);
-
 					if (target == null)
 					{
-						//target = new PlayerInfo
-						//{
-						//	UserId = users[0].ID,
-						//	ChatData = new ChatData(null, null, e.Parameters[2]),
-						//	Permissions = new PermissionCollection()
-						//};
 						target = new PlayerInfo(users[0].ID, new ChatData(color: e.Parameters[2]), new PermissionCollection());
-
 						_plugin.Database.Add(target);
 					}
 					else
@@ -461,7 +401,6 @@ namespace UserSpecificFunctions
 			else
 			{
 				var target = _plugin.Database.Get(users[0]);
-
 				if (target == null)
 				{
 					e.Player.SendErrorMessage("This user has no custom chat data.");
@@ -590,14 +529,7 @@ namespace UserSpecificFunctions
 
 				if (target == null)
 				{
-					//target = new PlayerInfo
-					//{
-					//	UserId = users[0].ID,
-					//	ChatData = new ChatData(),
-					//	Permissions = new PermissionCollection(e.Parameters)
-					//};
 					target = new PlayerInfo(users[0].ID, new ChatData(), new PermissionCollection(e.Parameters));
-
 					_plugin.Database.Add(target);
 				}
 				else

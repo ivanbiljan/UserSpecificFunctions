@@ -56,18 +56,6 @@ namespace UserSpecificFunctions
 		/// <returns>A <see cref="PlayerInfo"/> object.</returns>
 		public PlayerInfo ParseFromQuery(QueryResult result)
 		{
-			//return new PlayerInfo
-			//{
-			//	UserId = result.Get<int>("UserID"),
-			//	ChatData = new ChatData
-			//	{
-			//		Prefix = result.Get<string>("Prefix"),
-			//		Suffix = result.Get<string>("Suffix"),
-			//		Color = result.Get<string>("Color")
-			//	},
-			//	Permissions = new PermissionCollection(Regex.Replace(result.Get<string>("Permissions"), @"\s+", "").Split(','))
-			//};
-
 			return new PlayerInfo(result.Get<int>("UserID"),
 				new ChatData(result.Get<string>("Prefix"), result.Get<string>("Suffix"), result.Get<string>("Color")),
 				new PermissionCollection(Regex.Replace(result.Get<string>("Permissions"), @"\s+", "").Split(',')));

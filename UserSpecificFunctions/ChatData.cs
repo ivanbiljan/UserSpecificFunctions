@@ -21,16 +21,6 @@
 		public string Color { get; set; }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ChatData"/> class.
-		/// </summary>
-		public ChatData()
-		{
-			Prefix = null;
-			Suffix = null;
-			Color = null;
-		}
-
-		/// <summary>
 		/// Initializes a new instance of the <see cref="ChatData"/> class with the specified prefix, suffix and chat color.
 		/// </summary>
 		/// <param name="prefix">The prefix.</param>
