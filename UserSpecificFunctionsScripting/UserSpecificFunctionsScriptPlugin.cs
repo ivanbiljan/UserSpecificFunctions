@@ -8,6 +8,7 @@ using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
 using TShockAPI.DB;
+using Jint.Native;
 using Wolfje.Plugins.Jist;
 using Wolfje.Plugins.Jist.Framework;
 using UserSpecificFunctions;
@@ -99,6 +100,18 @@ namespace UserSpecificFunctionsScripting
 			}
 
 			return null;
+		}
+
+		[JavascriptFunction("usf_setUserPrefix")]
+		public void SetAccountPrefix(PlayerInfo player, string prefix)
+		{
+			if (UserSpecificFunctionsPlugin.Instance == null || player == null)
+			{
+				return;
+			}
+
+			player.ChatData.Prefix = prefix;
+			UserSpecificFunctionsPlugin.Instance.Database.Update(player, UserSpecificFunctions.Database.DatabaseUpdate.Prefix);
 		}
 	}
 }

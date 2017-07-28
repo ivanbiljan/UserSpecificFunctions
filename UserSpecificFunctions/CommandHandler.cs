@@ -61,8 +61,8 @@ namespace UserSpecificFunctions
 
 				var playerInfo = e.Player.GetData<PlayerInfo>(PlayerInfo.DataKey);
 				var cmdNames = from cmd in Commands.ChatCommands
-											   where cmd.CanRun(e.Player) && (!playerInfo?.Permissions.ContainsPermission(cmd.Permissions.ElementAtOrDefault(0)) ?? true)
-											   || ((playerInfo?.Permissions.ContainsPermission(cmd.Permissions.ElementAtOrDefault(0)) ?? true) && (cmd.Name != "auth" || TShock.AuthToken != 0))
+											   where cmd.CanRun(e.Player) && (!playerInfo?.Permissions.Negated(cmd.Permissions.ElementAtOrDefault(0)) ?? true)
+											   || (playerInfo?.Permissions.ContainsPermission(cmd.Permissions.ElementAtOrDefault(0)) ?? true) && (cmd.Name != "auth" || TShock.AuthToken != 0)
 											   orderby cmd.Name
 											   select TShock.Config.CommandSpecifier + cmd.Name;
 
@@ -165,7 +165,7 @@ namespace UserSpecificFunctions
 
 		private static void SendInvalidSyntax(CommandArgs e)
 		{
-			var help = new Dictionary<string, string>()
+			var help = new Dictionary<string, string>
 			{
 				{ "prefix", "Sets the player's chat prefix" },
 				{ "suffix", "Sets the player's chat suffix" },

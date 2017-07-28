@@ -144,5 +144,19 @@ namespace UserSpecificFunctions.Permissions
 			//return _permissions.Any(p => p.Equals(permission));
 			return ContainsPermission(new Permission(permission));
 		}
+
+		/// <summary>
+		/// Checks whether the given permission is negated.
+		/// </summary>
+		/// <param name="permission">The permission.</param>
+		/// <returns>True or false.</returns>
+		public bool Negated(Permission permission) => _permissions.Any(p => p.Equals(permission) && p.Negated);
+
+		/// <summary>
+		/// Checks whether the given permission is negated.
+		/// </summary>
+		/// <param name="permission">The permission.</param>
+		/// <returns>True or false.</returns>
+		public bool Negated(string permission) => _permissions.Any(p => p.Equals(new Permission(permission)) && p.Negated);
 	}
 }
