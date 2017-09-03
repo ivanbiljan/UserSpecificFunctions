@@ -86,6 +86,47 @@ namespace UserSpecificFunctions.Permissions
 		}
 
 		/// <summary>
+		/// Checks whether the <paramref name="permission"/> is a part of the collection.
+		/// </summary>
+		/// <param name="permission">The permission.</param>
+		/// <returns>True or false.</returns>
+		public bool ContainsPermission(Permission permission)
+		{
+			if (permission == null || string.IsNullOrWhiteSpace(permission.Name))
+			{
+				return true;
+			}
+
+			//if (permission.Negated)
+			//{
+			//	return false;
+			//}
+
+			return _permissions.Any(p => p.Equals(permission));
+		}
+
+		/// <summary>
+		/// Checks whether the <paramref name="permission"/> is a part of the collection.
+		/// </summary>
+		/// <param name="permission">The permission.</param>
+		/// <returns>True or false.</returns>
+		public bool ContainsPermission(string permission) => ContainsPermission(new Permission(permission));
+
+		/// <summary>
+		/// Checks whether the given permission is negated.
+		/// </summary>
+		/// <param name="permission">The permission.</param>
+		/// <returns>True or false.</returns>
+		public bool Negated(Permission permission) => _permissions.Any(p => p.Equals(permission) && p.Negated);
+
+		/// <summary>
+		/// Checks whether the given permission is negated.
+		/// </summary>
+		/// <param name="permission">The permission.</param>
+		/// <returns>True or false.</returns>
+		public bool Negated(string permission) => Negated(new Permission(permission));
+
+		/// <summary>
 		/// Removes a permission from the collection.
 		/// </summary>
 		/// <param name="permission">The permission.</param>
@@ -100,63 +141,7 @@ namespace UserSpecificFunctions.Permissions
 		/// <param name="permission">The permission.</param>
 		public void RemovePermission(string permission)
 		{
-			//_permissions.RemoveAll(p => p.Equals(permission));
 			RemovePermission(new Permission(permission));
 		}
-
-		/// <summary>
-		/// Checks whether the <paramref name="permission"/> is a part of the collection.
-		/// </summary>
-		/// <param name="permission">The permission.</param>
-		/// <returns>True or false.</returns>
-		public bool ContainsPermission(Permission permission)
-		{
-			if (permission == null)
-			{
-				return true;
-			}
-
-			if (permission.Negated)
-			{
-				return false;
-			}
-
-			return _permissions.Any(p => p.Equals(permission));
-		}
-
-		/// <summary>
-		/// Checks whether the <paramref name="permission"/> is a part of the collection.
-		/// </summary>
-		/// <param name="permission">The permission.</param>
-		/// <returns>True or false.</returns>
-		public bool ContainsPermission(string permission)
-		{
-			if (string.IsNullOrWhiteSpace(permission))
-			{
-				return true;
-			}
-
-			//if (permission.StartsWith("!"))
-			//{
-			//	return false;
-			//}
-
-			//return _permissions.Any(p => p.Equals(permission));
-			return ContainsPermission(new Permission(permission));
-		}
-
-		/// <summary>
-		/// Checks whether the given permission is negated.
-		/// </summary>
-		/// <param name="permission">The permission.</param>
-		/// <returns>True or false.</returns>
-		public bool Negated(Permission permission) => _permissions.Any(p => p.Equals(permission) && p.Negated);
-
-		/// <summary>
-		/// Checks whether the given permission is negated.
-		/// </summary>
-		/// <param name="permission">The permission.</param>
-		/// <returns>True or false.</returns>
-		public bool Negated(string permission) => _permissions.Any(p => p.Equals(new Permission(permission)) && p.Negated);
 	}
 }

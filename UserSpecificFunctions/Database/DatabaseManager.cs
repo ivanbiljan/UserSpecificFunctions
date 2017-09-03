@@ -1,49 +1,51 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Data;
-using TShockAPI;
-using TShockAPI.DB;
 using Mono.Data.Sqlite;
 using MySql.Data.MySqlClient;
+using TShockAPI;
+using TShockAPI.DB;
+using UserSpecificFunctions.Permissions;
 
 namespace UserSpecificFunctions.Database
 {
 	/// <summary>
 	/// Represents the database manager.
 	/// </summary>
-	public sealed class DatabaseManager
+	public sealed class DatabaseManager : IDisposable
 	{
-		private static IDbConnection _db;
+		private readonly List<PlayerInfo> _cache = new List<PlayerInfo>();
+		private readonly IDbConnection _db;
 
 		/// <summary>
-		/// Connects the database.
+		/// Initializes a new instance of the <see cref="DatabaseManager"/> class.
 		/// </summary>
-		public void Connect()
+		public DatabaseManager()
 		{
 			switch (TShock.Config.StorageType.ToLower())
 			{
 				case "mysql":
-					string[] dbHost = TShock.Config.MySqlHost.Split(':');
-					_db = new MySqlConnection()
+					var dbHost = TShock.Config.MySqlHost.Split(':');
+					_db = new MySqlConnection
 					{
-						ConnectionString = string.Format("Server={0}; Port={1}; Database={2}; Uid={3}; Pwd={4};",
-							dbHost[0],
-							dbHost.Length == 1 ? "3306" : dbHost[1],
-							TShock.Config.MySqlDbName,
-							TShock.Config.MySqlUsername,
-							TShock.Config.MySqlPassword)
-
+						ConnectionString =
+							$"Server={dbHost[0]}; " +
+							$"Port={(dbHost.Length == 1 ? "3306" : dbHost[1])}; " +
+							$"Database={TShock.Config.MySqlDbName}; " +
+							$"Uid={TShock.Config.MySqlUsername}; " +
+							$"Pwd={TShock.Config.MySqlPassword};"
 					};
 					break;
 
 				case "sqlite":
-					string sql = Path.Combine(TShock.SavePath, "tshock.sqlite");
-					_db = new SqliteConnection(string.Format("uri=file://{0},Version=3", sql));
+					var sql = Path.Combine(TShock.SavePath, "tshock.sqlite");
+					_db = new SqliteConnection($"uri=file://{sql},Version=3");
 					break;
 			}
 
-			SqlTableCreator sqlcreator = new SqlTableCreator(_db, _db.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
+			var sqlcreator = new SqlTableCreator(_db, _db.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
 
 			sqlcreator.EnsureTableStructure(new SqlTable("UserSpecificFunctions",
 				new SqlColumn("UserID", MySqlDbType.Int32),
@@ -54,31 +56,33 @@ namespace UserSpecificFunctions.Database
 		}
 
 		/// <summary>
+		/// Disposes the database connection.
+		/// </summary>
+		public void Dispose()
+		{
+			_db.Dispose();
+		}
+
+		/// <summary>
 		/// Inserts a new object into the database.
 		/// </summary>
 		/// <param name="playerInfo">The object.</param>
 		public void Add(PlayerInfo playerInfo)
 		{
+			_cache.Add(playerInfo);
 			_db.Query("INSERT INTO UserSpecificFunctions (UserID, Prefix, Suffix, Color, Permissions) VALUES (@0, @1, @2, @3, @4);",
 				playerInfo.UserId, playerInfo.ChatData.Prefix, playerInfo.ChatData.Suffix, playerInfo.ChatData.Color, playerInfo.Permissions.ToString());
 		}
 
-		/// <summary>
-		/// Returns a <see cref="PlayerInfo"/> object by matching the user ID in the database.
-		/// </summary>
-		/// <param name="userId">The user's ID.</param>
-		/// <returns>The <see cref="PlayerInfo"/> object associated with the user.</returns>
-		public PlayerInfo Get(int userId)
-		{
-			using (var result = _db.QueryReader("SELECT * FROM UserSpecificFunctions WHERE UserID = @0;", userId))
-			{
-				if (result.Read())
-				{
-					return new PlayerInfo().ParseFromQuery(result);
-				}
-			}
-			return default(PlayerInfo);
-		}
+		///// <summary>
+		///// Returns a <see cref="PlayerInfo"/> object by matching the user ID in the database.
+		///// </summary>
+		///// <param name="userId">The user's ID.</param>
+		///// <returns>The <see cref="PlayerInfo"/> object associated with the user.</returns>
+		//public PlayerInfo Get(int userId)
+		//{
+		//	return _cache.SingleOrDefault(p => p.UserId == userId);
+		//}
 
 		/// <summary>
 		/// Returns a <see cref="PlayerInfo"/> object by matching the user from the database.
@@ -87,44 +91,53 @@ namespace UserSpecificFunctions.Database
 		/// <returns>The <see cref="PlayerInfo"/> object associated with the user.</returns>
 		public PlayerInfo Get(User user)
 		{
-			return Get(user.ID);
+			return _cache.SingleOrDefault(p => p.UserId == user.ID);
 		}
 
 		/// <summary>
-		/// Updates the database with new values.
+		/// Loads the database.
 		/// </summary>
-		/// <param name="playerInfo">The <see cref="PlayerInfo"/> object.</param>
-		/// <param name="updateType">The update type.</param>
-		public void Update(PlayerInfo playerInfo, DatabaseUpdate updateType)
+		public void Load()
 		{
-			if (updateType == 0)
+			_cache.Clear();
+			using (var reader = _db.QueryReader("SELECT * FROM UserSpecificFunctions"))
 			{
-				return;
-			}
+				while (reader.Read())
+				{
+					var userId = reader.Get<int>("UserID");
+					var chatData = new ChatData(reader.Get<string>("Prefix"), reader.Get<string>("Suffix"),
+						reader.Get<string>("Color"));
+					var permissions = new PermissionCollection(reader.Get<string>("Permissions").Split(','));
 
-			var updates = new List<string>();
-			if ((updateType & DatabaseUpdate.Prefix) == DatabaseUpdate.Prefix)
-			{
-				updates.Add($"Prefix = '{playerInfo.ChatData.Prefix}'");
+					var playerInfo = new PlayerInfo(userId, chatData, permissions);
+					_cache.Add(playerInfo);
+				}
 			}
-			if ((updateType & DatabaseUpdate.Suffix) == DatabaseUpdate.Suffix)
-			{
-				updates.Add($"Suffix = '{playerInfo.ChatData.Suffix}'");
-			}
-			if ((updateType & DatabaseUpdate.Color) == DatabaseUpdate.Color)
-			{
-				updates.Add($"Color = '{playerInfo.ChatData.Color}'");
-			}
-			if ((updateType & DatabaseUpdate.Permissions) == DatabaseUpdate.Permissions)
-			{
-				updates.Add($"Permissions = '{playerInfo.Permissions.ToString()}'");
-			}
+		}
 
-			_db.Query($"UPDATE UserSpecificFunctions SET {string.Join(", ", updates)} WHERE UserID = {playerInfo.UserId}");
+		/// <summary>
+		/// Removes a user from the database.
+		/// </summary>
+		/// <param name="user">The user.</param>
+		public void Remove(User user)
+		{
+			_cache.RemoveAll(p => p.UserId == user.ID);
+			_db.Query("DELETE FROM UserSpecificFunctions WHERE UserID = @0", user.ID);
+		}
 
-			// Check if the player is online and update accordingly
-			var player = TShock.Players.FirstOrDefault(p => p?.User?.ID == playerInfo.UserId);
-			player?.SetData(PlayerInfo.DataKey, playerInfo);
+		/// <summary>
+		/// Updates the given player.
+		/// </summary>
+		/// <param name="playerInfo">The player.</param>
+		public void Update(PlayerInfo playerInfo)
+		{
+			_db.Query(
+				"UPDATE UserSpecificFunctions SET Prefix = @0, Suffix = @1, Color = @2, Permissions = @3 WHERE UserID = @4",
+				playerInfo.ChatData.Prefix, playerInfo.ChatData.Suffix, playerInfo.ChatData.Color,
+				string.Join(",", playerInfo.Permissions), playerInfo.UserId);
+
+			var player = TShock.Players.SingleOrDefault(p => p?.User?.ID == playerInfo.UserId);
+			player?.SetData(PlayerInfo.PlayerInfoKey, playerInfo);
 		}
 	}
 }

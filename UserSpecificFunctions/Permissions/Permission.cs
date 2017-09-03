@@ -69,7 +69,7 @@ namespace UserSpecificFunctions.Permissions
 		/// <param name="left">The first permission.</param>
 		/// <param name="right">The second permission.</param>
 		/// <returns><c>true</c> if the permissions are equal.</returns>
-		public static bool operator ==(Permission left, Permission right) => left.Equals(right);
+		public static bool operator ==(Permission left, Permission right) => left?.Equals(right) ?? false;
 
 		/// <summary>
 		/// Tests for inequality of two permission objects.
@@ -77,7 +77,7 @@ namespace UserSpecificFunctions.Permissions
 		/// <param name="left">The first permission.</param>
 		/// <param name="right">The second permission.</param>
 		/// <returns><c>true</c> if the permissions are not equal.</returns>
-		public static bool operator !=(Permission left, Permission right) => !left.Equals(right);
+		public static bool operator !=(Permission left, Permission right) => !left?.Equals(right) ?? false;
 
 		/// <summary>
 		/// Returns the string representation of this permission.
