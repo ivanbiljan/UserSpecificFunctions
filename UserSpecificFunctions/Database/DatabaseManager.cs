@@ -70,8 +70,10 @@ namespace UserSpecificFunctions.Database
 		public void Add(PlayerInfo playerInfo)
 		{
 			_cache.Add(playerInfo);
-			_db.Query("INSERT INTO UserSpecificFunctions (UserID, Prefix, Suffix, Color, Permissions) VALUES (@0, @1, @2, @3, @4);",
-				playerInfo.UserId, playerInfo.ChatData.Prefix, playerInfo.ChatData.Suffix, playerInfo.ChatData.Color, playerInfo.Permissions.ToString());
+			_db.Query(
+				"INSERT INTO UserSpecificFunctions (UserID, Prefix, Suffix, Color, Permissions) VALUES (@0, @1, @2, @3, @4);",
+				playerInfo.UserId, playerInfo.ChatData.Prefix, playerInfo.ChatData.Suffix, playerInfo.ChatData.Color,
+				string.Join(",", playerInfo.Permissions));
 		}
 
 		///// <summary>
@@ -105,9 +107,10 @@ namespace UserSpecificFunctions.Database
 				while (reader.Read())
 				{
 					var userId = reader.Get<int>("UserID");
-					var chatData = new ChatData(reader.Get<string>("Prefix"), reader.Get<string>("Suffix"),
-						reader.Get<string>("Color"));
-					var permissions = new PermissionCollection(reader.Get<string>("Permissions").Split(','));
+					var chatData = new ChatData(reader.Get<string>("Color"), reader.Get<string>("Prefix"),
+						reader.Get<string>("Suffix"));
+					var permissions = new PermissionCollection(reader.Get<string>("Permissions").Replace(" ", string.Empty)
+						.Split(','));
 
 					var playerInfo = new PlayerInfo(userId, chatData, permissions);
 					_cache.Add(playerInfo);

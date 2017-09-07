@@ -64,10 +64,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandHandler.cs" />
     <Compile Include="Database\DatabaseManager.cs" />
     <Compile Include="Database\ChatData.cs" />
-    <Compile Include="Extensions\TSPlayer.Extensions.cs" />
     <Compile Include="UserSpecificFunctionsConfig.cs" />
     <Compile Include="Extensions\String.Extensions.cs" />
     <Compile Include="Permissions\Permission.cs" />

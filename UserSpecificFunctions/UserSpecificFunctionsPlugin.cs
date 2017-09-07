@@ -25,7 +25,6 @@ namespace UserSpecificFunctions
 	{
 		private static readonly string ConfigPath = Path.Combine(TShock.SavePath, "userspecificfunctions.json");
 
-		//private CommandHandler _commandHandler;
 		private UserSpecificFunctionsConfig _config;
 		private DatabaseManager _database;
 
@@ -65,7 +64,6 @@ namespace UserSpecificFunctions
 		{
 			if (disposing)
 			{
-				//_commandHandler.Dispose();
 				_database.Dispose();
 				File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(_config, Formatting.Indented));
 
@@ -86,14 +84,7 @@ namespace UserSpecificFunctions
 		/// </summary>
 		public override void Initialize()
 		{
-			//_commandHandler = new CommandHandler(this);
-			//_commandHandler.Register();
-
-			if (File.Exists(ConfigPath))
-			{
-				_config = JsonConvert.DeserializeObject<UserSpecificFunctionsConfig>(File.ReadAllText(ConfigPath));
-			}
-
+			_config = UserSpecificFunctionsConfig.ReadOrCreate(ConfigPath);
 			_database = new DatabaseManager();
 			_database.Load();
 
@@ -102,71 +93,8 @@ namespace UserSpecificFunctions
 			PlayerHooks.PlayerPermission += OnPlayerPermission;
 			ServerApi.Hooks.ServerChat.Register(this, OnServerChat);
 
-			// We have to remove TShock's existing help command in order to extend it with our own logic
-			Commands.ChatCommands.RemoveAll(c => c.HasAlias("help"));
-			Commands.ChatCommands.Add(new Command(Help, "help"));
 			Commands.ChatCommands.Add(new Command(UsCommandHandler, "us"));
 			Commands.ChatCommands.Add(new Command(UsPermissionCommandHandler, "permission"));
-		}
-
-		private static void Help(CommandArgs e)
-		{
-			if (e.Parameters.Count > 1)
-			{
-				e.Player.SendErrorMessage("Invalid syntax! Proper syntax: {0}help <command/page>", TShock.Config.CommandSpecifier);
-				return;
-			}
-
-			if (e.Parameters.Count == 0 || int.TryParse(e.Parameters[0], out int pageNumber))
-			{
-				if (!PaginationTools.TryParsePageNumber(e.Parameters, 0, e.Player, out pageNumber))
-				{
-					return;
-				}
-
-				var cmdNames = from cmd in Commands.ChatCommands
-					where cmd.CanRun(e.Player) && (cmd.Name != "auth" || TShock.AuthToken != 0)
-					orderby cmd.Name
-					select TShock.Config.CommandSpecifier + cmd.Name;
-
-				PaginationTools.SendPage(e.Player, pageNumber, PaginationTools.BuildLinesFromTerms(cmdNames),
-					new PaginationTools.Settings
-					{
-						HeaderFormat = "Commands ({0}/{1}):",
-						FooterFormat = "Type {0}help {{0}} for more.".SFormat(TShock.Config.CommandSpecifier)
-					});
-			}
-			else
-			{
-				var commandName = e.Parameters[0].ToLower();
-				if (commandName.StartsWith(TShock.Config.CommandSpecifier))
-				{
-					commandName = commandName.Substring(1);
-				}
-
-				var command = Commands.ChatCommands.Find(c => c.Names.Contains(commandName));
-				if (command == null)
-				{
-					e.Player.SendErrorMessage("Invalid command.");
-					return;
-				}
-				if (!command.CanRun(e.Player) && !e.Player.HasPermission(command.Permissions[0]))
-				{
-					e.Player.SendErrorMessage("You do not have access to this command.");
-					return;
-				}
-
-				e.Player.SendSuccessMessage("{0}{1} help: ", TShock.Config.CommandSpecifier, command.Name);
-				if (command.HelpDesc == null)
-				{
-					e.Player.SendInfoMessage(command.HelpText);
-					return;
-				}
-				foreach (var line in command.HelpDesc)
-				{
-					e.Player.SendInfoMessage(line);
-				}
-			}
 		}
 
 		private void OnAccountDelete(AccountDeleteEventArgs e)
@@ -177,35 +105,40 @@ namespace UserSpecificFunctions
 			}
 		}
 
-		private static void OnPlayerPermission(PlayerPermissionEventArgs e)
+		private void OnPlayerPermission(PlayerPermissionEventArgs e)
 		{
-			var playerInfo = e.Player.GetPlayerInfo();
+			if (!e.Player.IsLoggedIn)
+			{
+				e.Result = PermissionHookResult.Unhandled;
+				return;
+			}
+
+			var playerInfo = _database.Get(e.Player.User);
 			if (playerInfo == null)
 			{
 				e.Result = PermissionHookResult.Unhandled;
+				return;
 			}
-			else if (playerInfo.Permissions.ContainsPermission(e.Permission) && !playerInfo.Permissions.Negated(e.Permission))
+
+			if (playerInfo.Permissions.ContainsPermission(e.Permission))
 			{
-				e.Result = PermissionHookResult.Granted;
+				e.Result = !playerInfo.Permissions.Negated(e.Permission)
+					? PermissionHookResult.Granted
+					: PermissionHookResult.Denied;
 			}
 			else
 			{
-				e.Result = playerInfo.Permissions.Negated(e.Permission)
-					? PermissionHookResult.Denied
-					: PermissionHookResult.Unhandled;
+				e.Result = PermissionHookResult.Unhandled;
 			}
 		}
 
 		private void OnReload(ReloadEventArgs e)
 		{
+			_config = UserSpecificFunctionsConfig.ReadOrCreate(ConfigPath);
 			_database.Load();
-			if (File.Exists(ConfigPath))
-			{
-				_config = JsonConvert.DeserializeObject<UserSpecificFunctionsConfig>(File.ReadAllText(ConfigPath));
-			}
 		}
 
-		private static void OnServerChat(ServerChatEventArgs e)
+		private void OnServerChat(ServerChatEventArgs e)
 		{
 			if (e.Handled)
 			{
@@ -213,7 +146,7 @@ namespace UserSpecificFunctions
 			}
 
 			var player = TShock.Players[e.Who];
-			if (player == null)
+			if (player == null || !player.IsLoggedIn)
 			{
 				return;
 			}
@@ -228,7 +161,7 @@ namespace UserSpecificFunctions
 				return;
 			}
 
-			var playerData = player.GetPlayerInfo();
+			var playerData = _database.Get(player.User);
 			var prefix = playerData?.ChatData.Prefix ?? player.Group.Prefix;
 			var suffix = playerData?.ChatData.Suffix ?? player.Group.Suffix;
 			var chatColor = playerData?.ChatData.Color?.ParseColor() ?? player.Group.ChatColor.ParseColor();

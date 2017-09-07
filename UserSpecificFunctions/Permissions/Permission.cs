@@ -41,7 +41,7 @@ namespace UserSpecificFunctions.Permissions
 		{
 			if (ReferenceEquals(null, other)) return false;
 			if (ReferenceEquals(this, other)) return true;
-			return string.Equals(Name, other.Name) && Negated == other.Negated;
+			return string.Equals(Name, other.Name);
 		}
 
 		/// <summary>
