@@ -130,18 +130,12 @@ namespace UserSpecificFunctions.Permissions
 		/// Removes a permission from the collection.
 		/// </summary>
 		/// <param name="permission">The permission.</param>
-		public void RemovePermission(Permission permission)
-		{
-			_permissions.RemoveAll(p => p.Equals(permission));
-		}
+		public void RemovePermission(Permission permission) => _permissions.RemoveAll(p => p.Equals(permission));
 
 		/// <summary>
 		/// Removes a permission from the collection.
 		/// </summary>
 		/// <param name="permission">The permission.</param>
-		public void RemovePermission(string permission)
-		{
-			RemovePermission(new Permission(permission));
-		}
+		public void RemovePermission(string permission) => RemovePermission(new Permission(permission));
 	}
 }

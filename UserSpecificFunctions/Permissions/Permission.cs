@@ -20,7 +20,7 @@ namespace UserSpecificFunctions.Permissions
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Permission"/> class with the specified name.
 		/// </summary>
-		/// <param name="name"></param>
+		/// <param name="name">The name.</param>
 		public Permission(string name)
 		{
 			if (name.StartsWith("!"))
@@ -69,7 +69,7 @@ namespace UserSpecificFunctions.Permissions
 		/// <param name="left">The first permission.</param>
 		/// <param name="right">The second permission.</param>
 		/// <returns><c>true</c> if the permissions are equal.</returns>
-		public static bool operator ==(Permission left, Permission right) => left?.Equals(right) ?? false;
+		public static bool operator ==(Permission left, Permission right) => left.Equals(right);
 
 		/// <summary>
 		/// Tests for inequality of two permission objects.
@@ -77,7 +77,7 @@ namespace UserSpecificFunctions.Permissions
 		/// <param name="left">The first permission.</param>
 		/// <param name="right">The second permission.</param>
 		/// <returns><c>true</c> if the permissions are not equal.</returns>
-		public static bool operator !=(Permission left, Permission right) => !left?.Equals(right) ?? false;
+		public static bool operator !=(Permission left, Permission right) => !left.Equals(right);
 
 		/// <summary>
 		/// Returns the string representation of this permission.

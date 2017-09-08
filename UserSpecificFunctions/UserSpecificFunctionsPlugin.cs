@@ -457,6 +457,15 @@ namespace UserSpecificFunctions
 
 				player.SendSuccessMessage($"Successfully set {user.Name}'s suffix.");
 			}
+			else
+			{
+				player.SendInfoMessage("Available commands:");
+				player.SendInfoMessage($"{Commands.Specifier}us prefix <player name> <prefix>");
+				player.SendInfoMessage($"{Commands.Specifier}us suffix <player name> <suffix>");
+				player.SendInfoMessage($"{Commands.Specifier}us color <player name> <color>");
+				player.SendInfoMessage($"{Commands.Specifier}us read <player name>");
+				player.SendInfoMessage($"{Commands.Specifier}us remove <player name> <prefix/suffix/color/all>");
+			}
 		}
 
 		private void UsPermissionCommandHandler(CommandArgs e)

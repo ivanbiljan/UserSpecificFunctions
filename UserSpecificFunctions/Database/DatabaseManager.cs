@@ -76,16 +76,6 @@ namespace UserSpecificFunctions.Database
 				string.Join(",", playerInfo.Permissions));
 		}
 
-		///// <summary>
-		///// Returns a <see cref="PlayerInfo"/> object by matching the user ID in the database.
-		///// </summary>
-		///// <param name="userId">The user's ID.</param>
-		///// <returns>The <see cref="PlayerInfo"/> object associated with the user.</returns>
-		//public PlayerInfo Get(int userId)
-		//{
-		//	return _cache.SingleOrDefault(p => p.UserId == userId);
-		//}
-
 		/// <summary>
 		/// Returns a <see cref="PlayerInfo"/> object by matching the user from the database.
 		/// </summary>

@@ -23,9 +23,9 @@
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ChatData"/> class with the specified prefix, suffix and chat color.
 		/// </summary>
+		/// <param name="color">The color.</param>
 		/// <param name="prefix">The prefix.</param>
 		/// <param name="suffix">The suffix.</param>
-		/// <param name="color">The color.</param>
 		public ChatData(string color = null, string prefix = null, string suffix = null)
 		{
 			Color = color;
