@@ -18,7 +18,7 @@ using UserSpecificFunctions.Permissions;
 namespace UserSpecificFunctions
 {
     /// <summary>
-    /// Represents the User Specific Functions plugin.
+    ///     Represents the User Specific Functions plugin.
     /// </summary>
     [ApiVersion(2, 1)]
     public sealed class UserSpecificFunctionsPlugin : TerrariaPlugin
@@ -29,37 +29,40 @@ namespace UserSpecificFunctions
         private DatabaseManager _database;
 
         /// <summary>
-        /// Gets the author.
+        ///     Initializes a new instance of the <see cref="UserSpecificFunctionsPlugin" /> class.
         /// </summary>
-        public override string Author => "Professor X";
-
-        /// <summary>
-        /// Gets the description.
-        /// </summary>
-        public override string Description => "N/A";
-
-        /// <summary>
-        /// Gets the name.
-        /// </summary>
-        public override string Name => "User Specific Functions";
-
-        /// <summary>
-        /// Gets the version.
-        /// </summary>
-        public override Version Version => Assembly.GetExecutingAssembly().GetName().Version;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserSpecificFunctionsPlugin"/> class.
-        /// </summary>
-        /// <param name="game">The <see cref="Main"/> instance.</param>
+        /// <param name="game">The <see cref="Main" /> instance.</param>
         public UserSpecificFunctionsPlugin(Main game) : base(game)
         {
         }
 
         /// <summary>
-        /// Releases unmanaged and - optionally - managed resources.
+        ///     Gets the author.
         /// </summary>
-        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        public override string Author => "Professor X";
+
+        /// <summary>
+        ///     Gets the description.
+        /// </summary>
+        public override string Description => "N/A";
+
+        /// <summary>
+        ///     Gets the name.
+        /// </summary>
+        public override string Name => "User Specific Functions";
+
+        /// <summary>
+        ///     Gets the version.
+        /// </summary>
+        public override Version Version => Assembly.GetExecutingAssembly().GetName().Version;
+
+        /// <summary>
+        ///     Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing">
+        ///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
+        ///     unmanaged resources.
+        /// </param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -80,7 +83,7 @@ namespace UserSpecificFunctions
         }
 
         /// <summary>
-        /// Initializes the plugin.
+        ///     Initializes the plugin.
         /// </summary>
         public override void Initialize()
         {
@@ -117,7 +120,7 @@ namespace UserSpecificFunctions
                 return;
             }
 
-            if (playerInfo.Permissions.ContainsPermission(e.Permission))
+            if (playerInfo.Permissions.Contains(e.Permission))
             {
                 e.Result = !playerInfo.Permissions.Negated(e.Permission)
                     ? PermissionHookResult.Granted
@@ -248,7 +251,7 @@ namespace UserSpecificFunctions
 
                 if (target == null)
                 {
-                    target = new PlayerInfo(user.ID, new ChatData(e.Parameters[2]), new PermissionCollection());
+                    target = new PlayerInfo(user.ID, new ChatData(color: e.Parameters[2]), new PermissionCollection());
                     _database.Add(target);
                 }
                 else
@@ -300,7 +303,7 @@ namespace UserSpecificFunctions
                 var target = _database.Get(user);
                 if (target == null)
                 {
-                    target = new PlayerInfo(user.ID, new ChatData(prefix: prefix), new PermissionCollection());
+                    target = new PlayerInfo(user.ID, new ChatData(prefix), new PermissionCollection());
                     _database.Add(target);
                 }
                 else
@@ -519,7 +522,7 @@ namespace UserSpecificFunctions
                 }
                 else
                 {
-                    e.Parameters.ForEach(p => target.Permissions.AddPermission(p));
+                    e.Parameters.ForEach(p => target.Permissions.Add(p));
                     _database.Update(target);
                 }
 
@@ -576,7 +579,7 @@ namespace UserSpecificFunctions
                     return;
                 }
 
-                e.Parameters.ForEach(p => target.Permissions.RemovePermission(p));
+                e.Parameters.ForEach(p => target.Permissions.Remove(p));
                 _database.Update(target);
                 player.SendSuccessMessage($"Modified '{user.Name}''s permissions successfully.");
             }
