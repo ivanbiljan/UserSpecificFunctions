@@ -5,15 +5,16 @@ namespace UserSpecificFunctions.Database
     /// <summary>
     ///     Holds information on a user's chat data.
     /// </summary>
-    public sealed class ChatData
+    public sealed class ChatInformation
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ChatData" /> class with the specified prefix, suffix and chat color.
+        ///     Initializes a new instance of the <see cref="ChatInformation" /> class with the specified prefix, suffix and chat
+        ///     color.
         /// </summary>
         /// <param name="prefix">The prefix.</param>
         /// <param name="suffix">The suffix.</param>
         /// <param name="color">The color.</param>
-        public ChatData(string prefix = null, string suffix = null, string color = null)
+        public ChatInformation(string prefix = null, string suffix = null, string color = null)
         {
             Prefix = prefix;
             Suffix = suffix;

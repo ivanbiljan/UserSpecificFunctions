@@ -17,7 +17,7 @@ namespace UserSpecificFunctions.Database
     /// </summary>
     public sealed class DatabaseManager : IDisposable
     {
-        private readonly List<PlayerInfo> _cache = new List<PlayerInfo>();
+        private readonly List<PlayerMetadata> _cache = new List<PlayerMetadata>();
         private readonly IDbConnection _connection;
 
         /// <summary>
@@ -47,16 +47,16 @@ namespace UserSpecificFunctions.Database
             }
 
             _connection.Query("CREATE TABLE IF NOT EXISTS UserSpecificFunctions (" +
-                      "UserId   INTEGER, " +
-                      "Prefix   TEXT DEFAULT NULL, " +
-                      "Suffix   TEXT DEFAULT NULL, " +
-                      "Color    TEXT DEFAULT NULL, " +
-                      "UNIQUE(UserId) ON CONFLICT REPLACE)");
+                              "UserId   INTEGER, " +
+                              "Prefix   TEXT DEFAULT NULL, " +
+                              "Suffix   TEXT DEFAULT NULL, " +
+                              "Color    TEXT DEFAULT NULL, " +
+                              "UNIQUE(UserId) ON CONFLICT REPLACE)");
             _connection.Query("CREATE TABLE IF NOT EXISTS UserHasPermission (" +
-                      "UserId       INTEGER, " +
-                      "Permission   TEXT NOT NULL, " +
-                      "IsNegated    INTEGER, " +
-                      "FOREIGN KEY(UserId) REFERENCES UserSpecificFunctions(UserId) ON DELETE CASCADE)");
+                              "UserId       INTEGER, " +
+                              "Permission   TEXT NOT NULL, " +
+                              "IsNegated    INTEGER, " +
+                              "FOREIGN KEY(UserId) REFERENCES UserSpecificFunctions(UserId))");
         }
 
         /// <summary>
@@ -70,10 +70,16 @@ namespace UserSpecificFunctions.Database
         /// <summary>
         ///     Inserts a new object into the database.
         /// </summary>
-        /// <param name="playerInfo">The object.</param>
-        public void Add(PlayerInfo playerInfo)
+        /// <param name="playerInfo">The object, which must not be <c>null</c>.</param>
+        public void Add([NotNull] PlayerMetadata playerInfo)
         {
-            _connection.Query("INSERT INTO UserSpecificFunctions (UserId, Prefix, Suffix, Color) VALUES (@0, @1, @2, @3)",
+            if (playerInfo == null)
+            {
+                throw new ArgumentNullException(nameof(playerInfo));
+            }
+
+            _connection.Query(
+                "INSERT INTO UserSpecificFunctions (UserId, Prefix, Suffix, Color) VALUES (@0, @1, @2, @3)",
                 playerInfo.UserId, playerInfo.ChatData.Prefix, playerInfo.ChatData.Suffix, playerInfo.ChatData.Color);
             foreach (var permission in playerInfo.Permissions.GetAll().Where(p => !string.IsNullOrWhiteSpace(p.Name)))
             {
@@ -83,12 +89,12 @@ namespace UserSpecificFunctions.Database
         }
 
         /// <summary>
-        ///     Returns a <see cref="PlayerInfo" /> object for the specified user.
+        ///     Returns a <see cref="PlayerMetadata" /> object for the specified user.
         /// </summary>
         /// <param name="user">The <see cref="User" /> object.</param>
-        /// <returns>The <see cref="PlayerInfo" /> object associated with the user.</returns>
+        /// <returns>The <see cref="PlayerMetadata" /> object associated with the user.</returns>
         [CanBeNull]
-        public PlayerInfo Get(User user)
+        public PlayerMetadata Get(User user)
         {
             return _cache.SingleOrDefault(p => p.UserId == user.ID);
         }
@@ -104,11 +110,12 @@ namespace UserSpecificFunctions.Database
                 while (reader.Read())
                 {
                     var userId = reader.Get<int>("UserId");
-                    var chatData = new ChatData(reader.Get<string>("Prefix"), reader.Get<string>("Suffix"),
+                    var chatData = new ChatInformation(reader.Get<string>("Prefix"), reader.Get<string>("Suffix"),
                         reader.Get<string>("Color"));
 
-                    var player = new PlayerInfo(userId, chatData);
-                    using (var reader2 = _connection.QueryReader("SELECT * FROM UserHasPermission WHERE UserId = @0", userId))
+                    var player = new PlayerMetadata(userId, chatData);
+                    using (var reader2 =
+                        _connection.QueryReader("SELECT * FROM UserHasPermission WHERE UserId = @0", userId))
                     {
                         while (reader2.Read())
                         {
@@ -124,21 +131,31 @@ namespace UserSpecificFunctions.Database
         }
 
         /// <summary>
-        ///     Removes the given user from the database.
+        ///     Removes the specified user from the database.
         /// </summary>
-        /// <param name="user">The user.</param>
-        public void Remove(User user)
+        /// <param name="user">The user, which must not be <c>null</c>.</param>
+        public void Remove([NotNull] User user)
         {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
             _cache.RemoveAll(p => p.UserId == user.ID);
             _connection.Query("DELETE FROM UserSpecificFunctions WHERE UserID = @0", user.ID);
         }
 
         /// <summary>
-        ///     Updates the given player.
+        ///     Updates the specified player's database information.
         /// </summary>
-        /// <param name="playerInfo">The player.</param>
-        public void Update(PlayerInfo playerInfo)
+        /// <param name="playerInfo">The player, which must not be <c>null</c>.</param>
+        public void Update([NotNull] PlayerMetadata playerInfo)
         {
+            if (playerInfo == null)
+            {
+                throw new ArgumentNullException(nameof(playerInfo));
+            }
+
             _connection.Query("UPDATE UserSpecificFunctions SET Prefix = @0, Suffix = @1, Color = @2 WHERE UserId = @3",
                 playerInfo.ChatData.Prefix, playerInfo.ChatData.Suffix, playerInfo.ChatData.Color, playerInfo.UserId);
             _connection.Query("DELETE FROM UserHasPermission WHERE UserId = @0", playerInfo.UserId);
@@ -182,7 +199,7 @@ namespace UserSpecificFunctions.Database
             }
 
             var player = TShock.Players.SingleOrDefault(p => p?.User?.ID == playerInfo.UserId);
-            player?.SetData(PlayerInfo.PlayerInfoKey, playerInfo);
+            player?.SetData(PlayerMetadata.PlayerInfoKey, playerInfo);
         }
     }
 }

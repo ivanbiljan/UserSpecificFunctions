@@ -68,12 +68,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Database\DatabaseManager.cs" />
-    <Compile Include="Database\ChatData.cs" />
+    <Compile Include="Database\ChatInformation.cs" />
     <Compile Include="UserSpecificFunctionsConfig.cs" />
     <Compile Include="Extensions\String.Extensions.cs" />
     <Compile Include="Permissions\Permission.cs" />
     <Compile Include="Permissions\PermissionCollection.cs" />
-    <Compile Include="Database\PlayerInfo.cs" />
+    <Compile Include="Database\PlayerMetadata.cs" />
     <Compile Include="UserSpecificFunctionsPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

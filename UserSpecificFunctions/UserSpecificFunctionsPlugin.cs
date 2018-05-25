@@ -37,22 +37,22 @@ namespace UserSpecificFunctions
         }
 
         /// <summary>
-        ///     Gets the author.
+        ///     Gets the plugin's author.
         /// </summary>
-        public override string Author => "Professor X";
+        public override string Author => "Ivan";
 
         /// <summary>
-        ///     Gets the description.
+        ///     Gets the plugin's description.
         /// </summary>
         public override string Description => "N/A";
 
         /// <summary>
-        ///     Gets the name.
+        ///     Gets the plugin's name.
         /// </summary>
         public override string Name => "User Specific Functions";
 
         /// <summary>
-        ///     Gets the version.
+        ///     Gets the plugin's version.
         /// </summary>
         public override Version Version => Assembly.GetExecutingAssembly().GetName().Version;
 
@@ -251,7 +251,7 @@ namespace UserSpecificFunctions
 
                 if (target == null)
                 {
-                    target = new PlayerInfo(user.ID, new ChatData(color: e.Parameters[2]), new PermissionCollection());
+                    target = new PlayerMetadata(user.ID, new ChatInformation(color: e.Parameters[2]), new PermissionCollection());
                     _database.Add(target);
                 }
                 else
@@ -303,7 +303,7 @@ namespace UserSpecificFunctions
                 var target = _database.Get(user);
                 if (target == null)
                 {
-                    target = new PlayerInfo(user.ID, new ChatData(prefix), new PermissionCollection());
+                    target = new PlayerMetadata(user.ID, new ChatInformation(prefix), new PermissionCollection());
                     _database.Add(target);
                 }
                 else
@@ -382,7 +382,7 @@ namespace UserSpecificFunctions
                             return;
                         }
 
-                        target.ChatData = new ChatData();
+                        target.ChatData = new ChatInformation();
                         player.SendSuccessMessage("Reset successful.");
                         break;
                     case "color":
@@ -461,7 +461,7 @@ namespace UserSpecificFunctions
                 var target = _database.Get(user);
                 if (target == null)
                 {
-                    target = new PlayerInfo(user.ID, new ChatData(suffix: suffix), new PermissionCollection());
+                    target = new PlayerMetadata(user.ID, new ChatInformation(suffix: suffix), new PermissionCollection());
                     _database.Add(target);
                 }
                 else
@@ -517,7 +517,7 @@ namespace UserSpecificFunctions
                 var target = _database.Get(user);
                 if (target == null)
                 {
-                    target = new PlayerInfo(user.ID, new ChatData(), new PermissionCollection(e.Parameters));
+                    target = new PlayerMetadata(user.ID, new ChatInformation(), new PermissionCollection(e.Parameters));
                     _database.Add(target);
                 }
                 else

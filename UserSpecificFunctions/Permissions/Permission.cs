@@ -92,6 +92,15 @@ namespace UserSpecificFunctions.Permissions
         }
 
         /// <summary>
+        ///     Returns the string representation of this permission.
+        /// </summary>
+        /// <returns>The string representation of this permission.</returns>
+        public override string ToString()
+        {
+            return Negated ? $"!{Name}" : Name;
+        }
+
+        /// <summary>
         ///     Tests for equality of two permission objects.
         /// </summary>
         /// <param name="left">The first permission.</param>
@@ -111,15 +120,6 @@ namespace UserSpecificFunctions.Permissions
         public static bool operator !=(Permission left, Permission right)
         {
             return !left.Equals(right);
-        }
-
-        /// <summary>
-        ///     Returns the string representation of this permission.
-        /// </summary>
-        /// <returns>The string representation of this permission.</returns>
-        public override string ToString()
-        {
-            return Negated ? $"!{Name}" : Name;
         }
     }
 }
