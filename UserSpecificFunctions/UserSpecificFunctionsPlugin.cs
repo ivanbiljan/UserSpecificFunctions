@@ -39,12 +39,12 @@ namespace UserSpecificFunctions
         /// <summary>
         ///     Gets the plugin's author.
         /// </summary>
-        public override string Author => "Ivan";
+        public override string Author => "Ivan B. & Simon311";
 
         /// <summary>
         ///     Gets the plugin's description.
         /// </summary>
-        public override string Description => "N/A";
+        public override string Description => "Allows setting custom prefix, suffix, color and permissions for individual users.";
 
         /// <summary>
         ///     Gets the plugin's name.
@@ -96,13 +96,13 @@ namespace UserSpecificFunctions
             PlayerHooks.PlayerPermission += OnPlayerPermission;
             ServerApi.Hooks.ServerChat.Register(this, OnServerChat);
 
-            Commands.ChatCommands.Add(new Command(UsCommandHandler, "us"));
-            Commands.ChatCommands.Add(new Command(UsPermissionCommandHandler, "permission"));
+            Commands.ChatCommands.Add(new Command("us.set", UsCommandHandler, "us"));
+            Commands.ChatCommands.Add(new Command("us.permission", UsPermissionCommandHandler, "permission"));
         }
 
         private void OnAccountDelete(AccountDeleteEventArgs e)
         {
-            _database.Remove(e.User);
+            _database.Remove(e.Account);
         }
 
         private void OnPlayerPermission(PlayerPermissionEventArgs e)
@@ -113,14 +113,14 @@ namespace UserSpecificFunctions
                 return;
             }
 
-            var playerInfo = _database.Get(e.Player.User);
+            var playerInfo = _database.Get(e.Player.Account);
             if (playerInfo == null)
             {
                 e.Result = PermissionHookResult.Unhandled;
                 return;
             }
 
-            if (playerInfo.Permissions.Contains(e.Permission))
+            if (e.Permission != null && playerInfo.Permissions.Contains(e.Permission))
             {
                 e.Result = !playerInfo.Permissions.Negated(e.Permission)
                     ? PermissionHookResult.Granted
@@ -156,13 +156,14 @@ namespace UserSpecificFunctions
                 return;
             }
 
-            if (e.Text.StartsWith(TShock.Config.CommandSpecifier) ||
-                e.Text.StartsWith(TShock.Config.CommandSilentSpecifier))
+            if (e.Text.StartsWith(TShock.Config.Settings.CommandSpecifier) ||
+                e.Text.StartsWith(TShock.Config.Settings.CommandSilentSpecifier) ||
+                (!string.IsNullOrWhiteSpace(e.CommandId._name) && e.CommandId._name != "Say"))
             {
                 return;
             }
 
-            var playerData = _database.Get(player.User);
+            var playerData = _database.Get(player.Account);
             if (playerData == null)
             {
                 return;
@@ -172,9 +173,9 @@ namespace UserSpecificFunctions
             var suffix = playerData.ChatData.Suffix ?? player.Group.Suffix;
             var chatColor = playerData.ChatData.Color?.ParseColor() ?? player.Group.ChatColor.ParseColor();
 
-            if (!TShock.Config.EnableChatAboveHeads)
+            if (!TShock.Config.Settings.EnableChatAboveHeads)
             {
-                var message = string.Format(TShock.Config.ChatFormat, player.Group.Name, prefix, player.Name, suffix,
+                var message = string.Format(TShock.Config.Settings.ChatFormat, player.Group.Name, prefix, player.Name, suffix,
                     e.Text);
                 TSPlayer.All.SendMessage(message, chatColor);
                 TSPlayer.Server.SendMessage(message, chatColor);
@@ -183,7 +184,7 @@ namespace UserSpecificFunctions
             else
             {
                 var playerName = player.TPlayer.name;
-                player.TPlayer.name = string.Format(TShock.Config.ChatAboveHeadsFormat, player.Group.Name, prefix,
+                player.TPlayer.name = string.Format(TShock.Config.Settings.ChatAboveHeadsFormat, player.Group.Name, prefix,
                     player.Name,
                     suffix);
                 NetMessage.SendData((int) PacketTypes.PlayerInfo, -1, -1, NetworkText.FromLiteral(player.TPlayer.name),
@@ -198,7 +199,7 @@ namespace UserSpecificFunctions
                 NetMessage.SendData((int) PacketTypes.PlayerInfo, -1, -1, NetworkText.FromLiteral(playerName), e.Who);
 
                 var msg =
-                    $"<{string.Format(TShock.Config.ChatAboveHeadsFormat, player.Group.Name, prefix, player.Name, suffix)}> {e.Text}";
+                    $"<{string.Format(TShock.Config.Settings.ChatAboveHeadsFormat, player.Group.Name, prefix, player.Name, suffix)}> {e.Text}";
 
                 player.SendMessage(msg, chatColor);
                 TSPlayer.Server.SendMessage(msg, chatColor);
@@ -228,13 +229,13 @@ namespace UserSpecificFunctions
                 }
 
                 var username = e.Parameters[1];
-                var user = TShock.Users.GetUserByName(username);
+                var user = TShock.UserAccounts.GetUserAccountByName(username);
                 if (user == null)
                 {
                     player.SendErrorMessage($"Couldn't find any users under the name of '{username}'.");
                     return;
                 }
-                if (user.Name != player.User?.Name && !e.Player.HasPermission("us.setother"))
+                if (user.Name != player.Account?.Name && !e.Player.HasPermission("us.setother"))
                 {
                     e.Player.SendErrorMessage("You do not have permission to modify another user's chat data.");
                     return;
@@ -272,13 +273,13 @@ namespace UserSpecificFunctions
                 }
 
                 var username = e.Parameters[1];
-                var user = TShock.Users.GetUserByName(username);
+                var user = TShock.UserAccounts.GetUserAccountByName(username);
                 if (user == null)
                 {
                     player.SendErrorMessage($"Couldn't find any users under the name of '{username}'.");
                     return;
                 }
-                if (user.Name != player.User?.Name && !e.Player.HasPermission("us.setother"))
+                if (user.Name != player.Account?.Name && !e.Player.HasPermission("us.setother"))
                 {
                     e.Player.SendErrorMessage("You do not have permission to modify another user's chat data.");
                     return;
@@ -324,7 +325,7 @@ namespace UserSpecificFunctions
                 }
 
                 var username = e.Parameters[1];
-                var user = TShock.Users.GetUserByName(username);
+                var user = TShock.UserAccounts.GetUserAccountByName(username);
                 if (user == null)
                 {
                     player.SendErrorMessage($"Couldn't find any users under the name of '{username}'.");
@@ -354,13 +355,13 @@ namespace UserSpecificFunctions
 
                 var inputOption = e.Parameters[2];
                 var username = e.Parameters[1];
-                var user = TShock.Users.GetUserByName(username);
+                var user = TShock.UserAccounts.GetUserAccountByName(username);
                 if (user == null)
                 {
                     player.SendErrorMessage($"Couldn't find any users under the name of '{username}'.");
                     return;
                 }
-                if (user.Name != player.User?.Name && !player.HasPermission("us.setother"))
+                if (user.Name != player.Account?.Name && !player.HasPermission("us.setother"))
                 {
                     player.SendErrorMessage("You do not have permission to modify another user's chat data.");
                     return;
@@ -431,13 +432,13 @@ namespace UserSpecificFunctions
                 }
 
                 var username = e.Parameters[1];
-                var user = TShock.Users.GetUserByName(username);
+                var user = TShock.UserAccounts.GetUserAccountByName(username);
                 if (user == null)
                 {
                     player.SendErrorMessage($"Couldn't find any users under the name of '{username}'.");
                     return;
                 }
-                if (user.Name != player.User.Name && !player.HasPermission("us.setother"))
+                if (user.Name != player.Account.Name && !player.HasPermission("us.setother"))
                 {
                     player.SendErrorMessage("You do not have permission to modify another user's chat data.");
                     return;
@@ -506,7 +507,7 @@ namespace UserSpecificFunctions
                 }
 
                 var username = e.Parameters[1];
-                var user = TShock.Users.GetUserByName(username);
+                var user = TShock.UserAccounts.GetUserAccountByName(username);
                 if (user == null)
                 {
                     player.SendErrorMessage($"Couldn't find any users under the name of '{username}'.");
@@ -538,7 +539,7 @@ namespace UserSpecificFunctions
                 }
 
                 var username = e.Parameters[1];
-                var user = TShock.Users.GetUserByName(username);
+                var user = TShock.UserAccounts.GetUserAccountByName(username);
                 if (user == null)
                 {
                     player.SendErrorMessage($"Couldn't find any users under the name of '{username}'.");
@@ -564,7 +565,7 @@ namespace UserSpecificFunctions
                 }
 
                 var username = e.Parameters[1];
-                var user = TShock.Users.GetUserByName(username);
+                var user = TShock.UserAccounts.GetUserAccountByName(username);
                 if (user == null)
                 {
                     player.SendErrorMessage($"Couldn't find any users under the name of '{username}'.");
