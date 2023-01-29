@@ -1,5 +1,5 @@
 # UserSpecificFunctions
-**UserSpecificFunctions** is the [TShock](https://github.com/Pryaxis/TShock) plugin that allows setting custom chat prefix, suffix and color, as well as custom TShock permissions for individual users, as opposed to groups.
+**UserSpecificFunctions** is the [TShock](https://github.com/Pryaxis/TShock) plugin that allows setting custom chat prefixes, suffixes and color, as well as custom TShock permissions for individual users, as opposed to groups.
 Players need to have an account for this to work.
 
 ## Commands
@@ -11,10 +11,18 @@ Players need to have an account for this to work.
   * `/us read [username]` - Prints out the user's custom chat properties
   * `/us remove [username] [prefix/suffix/color/all]` - Removes the custom chat properties of the user, requires either the corresponding `us.remove.prefix` (`.suffix`, `.color`) permission, or the `us.resetall` permission.
 
-- `/permission` - Allows to give or take away permissions of individual users. Requires the `us.permission` permission to run.
+- `/permission`  - Allows to give or take away permissions of individual users. Requires the `us.permission` permission to run.
   * `/permission add [username] [permission1 permission2]` - Give permissions to the user. Use `!` before the permission to take away a permission granted to the user by their group, like so `!tshock.tp.spawn`
   * `/permission remove [username] [permission1 permission2]` - Remove custom permissions from the user.
   * `/permission list [username]` - Lists the user's custom permissions.
+
+## Config file
+The config file is named `userspecificfunctions.json` and is located in the default `tshock` folder and uses [JSON formatting](https://www.w3schools.in/json/json-syntax/).
+
+Config settings:
+- `MaximumPrefixLength` - Maximum number of characters in a custom prefix, default is `10`
+- `MaximumSuffixLength` - Maximum number of characters in a custom suffix, default is `10`
+- `ProhibitedWords` - List of words that are prohibited to have in custom prefixes and suffixes
 
 ## Authors and contributors
 [@IvanBiljan](https://github.com/ivanbiljan) - The Author
