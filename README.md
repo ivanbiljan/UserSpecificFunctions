@@ -16,6 +16,8 @@ Players need to have an account for this to work.
   * `/permission remove [username] [permission1 permission2]` - Remove custom permissions from the user.
   * `/permission list [username]` - Lists the user's custom permissions.
 
+- `/reload` - The TShock command to reload the config file and other things. The plugin should reload its config settings and database as well.
+
 ## Config file
 The config file is named `userspecificfunctions.json` and is located in the default `tshock` folder and uses [JSON formatting](https://www.w3schools.in/json/json-syntax/).
 
