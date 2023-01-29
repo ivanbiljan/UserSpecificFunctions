@@ -68,7 +68,6 @@ namespace UserSpecificFunctions
             if (disposing)
             {
                 _database.Dispose();
-                File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(_config, Formatting.Indented));
 
                 AccountHooks.AccountDelete -= OnAccountDelete;
                 GeneralHooks.ReloadEvent -= OnReload;
