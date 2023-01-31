@@ -57,7 +57,7 @@ namespace UserSpecificFunctions.Permissions
         /// <returns><c>true</c> if the permissions are equal; otherwise, <c>false</c>.</returns>
         public bool Equals(Permission other)
         {
-            if (ReferenceEquals(null, other))
+            if (other is null)
             {
                 return false;
             }

@@ -4,7 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
-using Mono.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using MySql.Data.MySqlClient;
 using TShockAPI;
 using TShockAPI.DB;
@@ -25,24 +25,24 @@ namespace UserSpecificFunctions.Database
         /// </summary>
         public DatabaseManager()
         {
-            switch (TShock.Config.StorageType.ToLower())
+            switch (TShock.Config.Settings.StorageType.ToLower())
             {
                 case "mysql":
-                    var dbHost = TShock.Config.MySqlHost.Split(':');
+                    var dbHost = TShock.Config.Settings.MySqlHost.Split(':');
                     _connection = new MySqlConnection
                     {
                         ConnectionString =
                             $"Server={dbHost[0]}; " +
                             $"Port={(dbHost.Length == 1 ? "3306" : dbHost[1])}; " +
-                            $"Database={TShock.Config.MySqlDbName}; " +
-                            $"Uid={TShock.Config.MySqlUsername}; " +
-                            $"Pwd={TShock.Config.MySqlPassword};"
+                            $"Database={TShock.Config.Settings.MySqlDbName}; " +
+                            $"Uid={TShock.Config.Settings.MySqlUsername}; " +
+                            $"Pwd={TShock.Config.Settings.MySqlPassword};"
                     };
                     break;
 
                 default:
                     var sql = Path.Combine(TShock.SavePath, "tshock.sqlite");
-                    _connection = new SqliteConnection($"uri=file://{sql},Version=3");
+                    _connection = new SqliteConnection($"DataSource={sql}");
                     break;
             }
 
@@ -86,7 +86,9 @@ namespace UserSpecificFunctions.Database
                 _connection.Query("INSERT INTO UserHasPermission (UserId, Permission, IsNegated) VALUES (@0, @1, @2)",
                     playerInfo.UserId, permission.Name, permission.Negated ? 1 : 0);
             }
-        }
+
+			_cache.Add(playerInfo);
+		}
 
         /// <summary>
         ///     Returns a <see cref="PlayerMetadata" /> object for the specified user.
@@ -94,7 +96,7 @@ namespace UserSpecificFunctions.Database
         /// <param name="user">The <see cref="User" /> object.</param>
         /// <returns>The <see cref="PlayerMetadata" /> object associated with the user.</returns>
         [CanBeNull]
-        public PlayerMetadata Get(User user)
+        public PlayerMetadata Get(UserAccount user)
         {
             return _cache.SingleOrDefault(p => p.UserId == user.ID);
         }
@@ -119,8 +121,8 @@ namespace UserSpecificFunctions.Database
                     {
                         while (reader2.Read())
                         {
-                            var permissionName = reader.Get<string>("Permission");
-                            var isNegated = reader.Get<int>("IsNegated") == 1;
+                            var permissionName = reader2.Get<string>("Permission");
+                            var isNegated = reader2.Get<int>("IsNegated") == 1;
                             player.Permissions.Add(new Permission(permissionName, isNegated));
                         }
                     }
@@ -134,7 +136,7 @@ namespace UserSpecificFunctions.Database
         ///     Removes the specified user from the database.
         /// </summary>
         /// <param name="user">The user, which must not be <c>null</c>.</param>
-        public void Remove([NotNull] User user)
+        public void Remove([NotNull] UserAccount user)
         {
             if (user == null)
             {
@@ -166,7 +168,7 @@ namespace UserSpecificFunctions.Database
                 {
                     try
                     {
-                        using (var command = (SqliteCommand) db.CreateCommand())
+                        using (var command = (SqliteCommand)db.CreateCommand())
                         {
                             command.CommandText =
                                 "INSERT INTO UserHasPermission (UserId, Permission, IsNegated) VALUES (@0, @1, @2)";
@@ -198,7 +200,7 @@ namespace UserSpecificFunctions.Database
                 }
             }
 
-            var player = TShock.Players.SingleOrDefault(p => p?.User?.ID == playerInfo.UserId);
+            var player = TShock.Players.SingleOrDefault(p => p?.Account?.ID == playerInfo.UserId);
             player?.SetData(PlayerMetadata.PlayerInfoKey, playerInfo);
         }
     }

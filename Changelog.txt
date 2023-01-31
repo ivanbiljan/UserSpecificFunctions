@@ -1,0 +1,22 @@
+Version 1.0.1.0: ~Simon311
+
+	Additions:
+		Compiled plugin now featured in the Release folder.
+		Added description inside the plugin.
+
+	Fixes:
+		Added permissions to run the commands, "us.set" for /us, and "us.permission" for /permission.
+		Fixed permissions not loading and stopping plugin initialization due to the wrong reader object being used.
+		Fixed adding things to a user not working without a restart due to the cache not being populated.
+		Fixed the permission handler erroring out because of null permissions being passed by TShock.
+		Fixed config changes not being loaded at all.
+
+	Updates:
+		Upgrade solution to .NET 6, as required
+		Ticked version and copyright
+		Replace Mono.Data.Sqlite with Microsoft.Data.Sqlite
+		Added handling Terraria's built-in commands because otherwise they were broken.
+		TShock.Config => TShock.Config.Settings
+		TShock.Users.GetUserByName => TShock.UserAccounts.GetUserAccountByName
+		player.User => player.Account
+		User => UserAccount
